@@ -5,7 +5,7 @@ import QtScxml 5.8
 Pane {
     id: panel
     property string icon
-    property string name
+    property alias name: button.name
     padding: 0
     anchors.verticalCenter: parent.verticalCenter
     background: null
@@ -24,10 +24,10 @@ Pane {
             spacing: 8
 
             StateButton {
+                id: button
                 radius: 20
                 source: "qrc:/img/target.png"
                 enabled: panel.enabled
-                name: panel.name
             }
 
             VSeparator {

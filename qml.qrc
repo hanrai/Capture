@@ -16,6 +16,7 @@
         <file>DataText.qml</file>
         <file>Workspace.qml</file>
         <file>MousePositionIndicator.qml</file>
+        <file>HotSpotIndicator.qml</file>
     </qresource>
     <qresource prefix="/img">
         <file>cursor.png</file>

@@ -12,6 +12,7 @@ Engine::Engine(QScxmlStateMachine *mc, QObject *parent) :
     machine(mc)
 {
     mp = new MousePosition(mc, this);
+    m_hotSpot = new HotSpot(&ocr, mc, this);
 }
 
 QImage Engine::requestImage(const QString &, QSize *size, const QSize &)
@@ -33,6 +34,5 @@ void Engine::capture()
         isSnapshotLoaded = true;
         emit snapshotLoadedChanged();
     }
-
     emit snapshotChanged();
 }

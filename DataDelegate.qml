@@ -5,6 +5,7 @@ Pane {
     id: panel
     property string titleIcon
     property string titleText
+    property alias name: button.name
     padding: 0
     anchors.verticalCenter: parent.verticalCenter
     background: null
@@ -22,6 +23,7 @@ Pane {
             spacing: 8
 
             StateButton {
+                id: button
                 radius: 20
                 source: "qrc:/img/target.png"
                 enabled: panel.enabled

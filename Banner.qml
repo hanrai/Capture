@@ -43,7 +43,8 @@ ToolBar {
         DataDelegate {
             titleIcon: "qrc:/img/tag.png"
             titleText: "合约"
-            enabled: machine.Ready
+            name: "Contract"
+            enabled: machine.Ready || (machine.HotSpotScan && hotSpot.name == name)
         }
 
         VSeparator {}

@@ -6,6 +6,7 @@
 #include <QQuickImageProvider>
 #include <QScxmlStateMachine>
 #include "mouseposition.h"
+#include "hotspot.h"
 
 class Engine : public QObject, public QQuickImageProvider
 {
@@ -24,6 +25,7 @@ public:
     }
 
     MousePosition *getMouseRanger() {return mp;}
+    HotSpot *getHotSpot() {return m_hotSpot;}
 
     virtual QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
 
@@ -40,6 +42,7 @@ private:
     Ocr ocr;
     QString snapName;
     QScxmlStateMachine *machine;
+    HotSpot *m_hotSpot;
 };
 
 #endif // OCRENGINE_H

@@ -105,6 +105,7 @@ ApplicationWindow {
                         "image://snapshot/"+engine.snapshot : ""
             onSourceChanged: {window.visibility = lastVisibility}
             MousePositionIndicator {}
+            HotSpotIndicator {}
         }
 
         ScrollIndicator.vertical: ScrollIndicator { }

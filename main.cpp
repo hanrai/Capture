@@ -26,13 +26,9 @@ int main(int argc, char *argv[])
     };
     Engine *mainEngine = new Engine(machine, &app);
 
-    qmlRegisterUncreatableType<QScxmlStateMachine>("StateMachine",
-                                                   1, 0,
-                                                   "StateMachine",
-                                                   QLatin1String("StateMachine is not creatable."));
-
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("engine", mainEngine);
+    engine.rootContext()->setContextProperty("hotSpot", mainEngine->getHotSpot());
     engine.rootContext()->setContextProperty("mousePosition", mainEngine->getMouseRanger());
     engine.rootContext()->setContextProperty("machine", machine);
     engine.addImageProvider("snapshot", mainEngine);
