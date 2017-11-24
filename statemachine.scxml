@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="statemachine" datamodel="ecmascript" qt:editorversion="4.4.1" initial="NoSnap">
+    <qt:editorinfo initialGeometry="69.63;90.11;-20;-20;40;40"/>
+    <state id="NoSnap">
+        <qt:editorinfo geometry="274.43;90.11;-60;-50;120;100" scenegeometry="274.43;90.11;214.43;40.11;120;100"/>
+        <transition type="external" event="Loaded" target="Ready">
+            <qt:editorinfo endTargetFactors="9.76;3.87"/>
+        </transition>
+    </state>
+    <state id="Ready">
+        <qt:editorinfo geometry="302.08;237.57;-60;-50;353;145" scenegeometry="302.08;237.57;242.08;187.57;353;145"/>
+        <transition type="external" event="Button.Clicked" target="GetMousePosition" cond="_event.data.name == &quot;MousePosition&quot;">
+            <qt:editorinfo endTargetFactors="46;17.34"/>
+        </transition>
+    </state>
+    <state id="GetMousePosition">
+        <qt:editorinfo geometry="267.27;440.32;-60;-50;183;100" scenegeometry="267.27;440.32;207.27;390.32;183;100"/>
+        <transition type="external" event="Mouse.RightClicked" target="Ready">
+            <qt:editorinfo endTargetFactors="58.51;81.63"/>
+        </transition>
+    </state>
+</scxml>

@@ -1,0 +1,32 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>WindowStateSaver.qml</file>
+        <file>Banner.qml</file>
+        <file>DataDelegate.qml</file>
+        <file>DataLabel.qml</file>
+        <file>MousePositionSelector.qml</file>
+        <file>statemachine.scxml</file>
+        <file>StateButton.qml</file>
+        <file>VSeparator.qml</file>
+        <file>CellTitle.qml</file>
+        <file>HSeparator.qml</file>
+        <file>LabelText.qml</file>
+        <file>DataText.qml</file>
+        <file>IndicatorsPanel.qml</file>
+    </qresource>
+    <qresource prefix="/img">
+        <file>cursor.png</file>
+        <file>dollar.png</file>
+        <file>tag.png</file>
+        <file>calendar.png</file>
+        <file>clock.png</file>
+        <file>cursor.png</file>
+        <file>dollar.png</file>
+        <file>resize.png</file>
+        <file>mouse.png</file>
+        <file>target.png</file>
+        <file>photo-camera.svg</file>
+    </qresource>
+</RCC>
