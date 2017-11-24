@@ -4,7 +4,7 @@
 #include <QScxmlStateMachine>
 #include <QFont>
 #include <QtDebug>
-#include "ocrengine.h"
+#include "engine.h"
 #include "mouseposition.h"
 
 int main(int argc, char *argv[])
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
             qDebug() << error.toString();
         }
     };
-    OCREngine *ocr = new OCREngine(machine, &app);
+    Engine *mainEngine = new Engine(machine, &app);
 
     qmlRegisterUncreatableType<QScxmlStateMachine>("StateMachine",
                                                    1, 0,
@@ -32,10 +32,10 @@ int main(int argc, char *argv[])
                                                    QLatin1String("StateMachine is not creatable."));
 
     QQmlApplicationEngine engine;
-    engine.rootContext()->setContextProperty("ocr", ocr);
-    engine.rootContext()->setContextProperty("mousePosition", ocr->getMouseRanger());
+    engine.rootContext()->setContextProperty("engine", mainEngine);
+    engine.rootContext()->setContextProperty("mousePosition", mainEngine->getMouseRanger());
     engine.rootContext()->setContextProperty("machine", machine);
-    engine.addImageProvider("snapshot", ocr);
+    engine.addImageProvider("snapshot", mainEngine);
     machine->start();
 
     engine.load(QUrl(QLatin1String("qrc:/main.qml")));

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QSettings>
+#include <QScxmlStateMachine>
 
 class MousePosition : public QObject
 {
@@ -12,7 +13,7 @@ class MousePosition : public QObject
     Q_PROPERTY(int spotRange READ spotRange WRITE setSpotRange NOTIFY spotRangeChanged)
 
 public:
-    explicit MousePosition(QObject *parent = nullptr);
+    explicit MousePosition(QScxmlStateMachine *machine, QObject *parent = nullptr);
 
     void setSpotX(int const p);
     int spotX() const;
@@ -33,6 +34,7 @@ private:
     int y;
     int w;
     QSettings settings;
+    QScxmlStateMachine *m_machine;
 };
 
 #endif // MOUSEPOSITION_H

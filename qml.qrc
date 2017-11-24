@@ -14,7 +14,8 @@
         <file>HSeparator.qml</file>
         <file>LabelText.qml</file>
         <file>DataText.qml</file>
-        <file>IndicatorsPanel.qml</file>
+        <file>Workspace.qml</file>
+        <file>MousePositionIndicator.qml</file>
     </qresource>
     <qresource prefix="/img">
         <file>cursor.png</file>

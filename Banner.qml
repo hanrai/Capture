@@ -27,7 +27,7 @@ ToolBar {
             onClicked: {
                 lastVisibility = window.visibility
                 window.visibility = ApplicationWindow.Minimized
-                ocr.capture()
+                engine.capture()
             }
         }
 

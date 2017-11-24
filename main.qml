@@ -7,7 +7,7 @@ ApplicationWindow {
     id: window
     title: qsTr("Capture")
     visible: true
-    property var lastVisibility
+    property int lastVisibility
 
     header: Banner {
         id: banner
@@ -33,115 +33,80 @@ ApplicationWindow {
         visible: true
         edge: Qt.RightEdge
 
-        ListView {
-            id: listView
-            anchors.fill: parent
+//        ListView {
+//            id: listView
+//            anchors.fill: parent
 
-            headerPositioning: ListView.OverlayHeader
-            header: Pane {
-                id: header
-                z: 2
-                width: parent.width
+//            headerPositioning: ListView.OverlayHeader
+//            header: Pane {
+//                id: header
+//                z: 2
+//                width: parent.width
 
-                contentHeight: logo.height
+//                contentHeight: logo.height
 
-                Image {
-                    id: logo
-                    width: parent.width
-                    source: "qrc:/img/photo-camera.svg"
-                    fillMode: implicitWidth > width ? Image.PreserveAspectFit : Image.Pad
-                }
+//                Image {
+//                    id: logo
+//                    width: parent.width
+//                    source: "qrc:/img/photo-camera.svg"
+//                    fillMode: implicitWidth > width ? Image.PreserveAspectFit : Image.Pad
+//                }
 
-                MenuSeparator {
-                    parent: header
-                    width: parent.width
-                    anchors.verticalCenter: parent.bottom
-                    visible: !listView.atYBeginning
-                }
-            }
+//                MenuSeparator {
+//                    parent: header
+//                    width: parent.width
+//                    anchors.verticalCenter: parent.bottom
+//                }
+//            }
 
-            footer: ItemDelegate {
-                id: footer
-                text: qsTr("Footer")
-                width: parent.width
+//            footer: ItemDelegate {
+//                id: footer
+//                text: qsTr("Footer")
+//                width: parent.width
 
-                MenuSeparator {
-                    parent: footer
-                    width: parent.width
-                    anchors.verticalCenter: parent.top
-                }
-            }
+//                MenuSeparator {
+//                    parent: footer
+//                    width: parent.width
+//                    anchors.verticalCenter: parent.top
+//                }
+//            }
 
-            model: 10
+//            model: 10
 
-            delegate: SwipeDelegate {
-                height: 130
-                DataDelegate {
-                    leftPadding: 8
-                    titleIcon: "qrc:/img/tag.png"
-                    titleText: "合约"
-                    enabled: machine.Ready
-                }
-                ToolSeparator{
-                    orientation: Qt.Horizontal
-                    width: 186
-                }
-            }
+//            delegate: SwipeDelegate {
+//                height: 130
+//                DataDelegate {
+//                    leftPadding: 8
+//                    titleIcon: "qrc:/img/tag.png"
+//                    titleText: "合约"
+//                    enabled: machine.Ready
+//                }
+//                ToolSeparator{
+//                    orientation: Qt.Horizontal
+//                    width: 186
+//                }
+//            }
 
-            ScrollIndicator.vertical: ScrollIndicator { }
-        }
+//            ScrollIndicator.vertical: ScrollIndicator { }
+//        }
     }
 
     Flickable {
-        anchors.top: banner.bottom
         x: 0
+        anchors.top: banner.bottom
         width: window.width - drawer.width
-        height: window.height - banner.height
-        contentWidth: image.width;
-        contentHeight: image.height
+        height: drawer.height
+        contentWidth: workspace.width;
+        contentHeight: workspace.height
 
-        Image {
-            id: image
-            source: "image://snapshot/"+ocr.snapshot
+        Workspace {
+            id: workspace
+            source: engine.snapshotLoaded ?
+                        "image://snapshot/"+engine.snapshot : ""
             onSourceChanged: {window.visibility = lastVisibility}
-            MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-                acceptedButtons: Qt.AllButtons
-                onPositionChanged: {
-                    machine.submitEvent("Mouse.Moved",
-                        {"X": mouseX, "Y": mouseY})
-                }
-                onClicked: {
-                    if(mouse.button & Qt.LeftButton) {
-                        machine.submitEvent("Mouse.LeftClicked",
-                            {"X": mouseX, "Y": mouseY})
-                    }
-                    if(mouse.button & Qt.RightButton) {
-                        machine.submitEvent("Mouse.RightClicked",
-                            {"X": mouseX, "Y": mouseY})
-                    }
-                    if(mouse.button & Qt.MiddleButton) {
-                        machine.submitEvent("Mouse.MiddleClicked",
-                            {"X": mouseX, "Y": mouseY})
-                    }
-                }
-                onDoubleClicked: {
-                    if(mouse.button & Qt.LeftButton) {
-                        machine.submitEvent("Mouse.LeftDoubleClicked",
-                            {"X": mouseX, "Y": mouseY})
-                    }
-                    if(mouse.button & Qt.RightButton) {
-                        machine.submitEvent("Mouse.RightDoubleClicked",
-                            {"X": mouseX, "Y": mouseY})
-                    }
-                    if(mouse.button & Qt.MiddleButton) {
-                        machine.submitEvent("Mouse.MiddleDoubleClicked",
-                            {"X": mouseX, "Y": mouseY})
-                    }
-                }
-            }
+            MousePositionIndicator {}
         }
+
         ScrollIndicator.vertical: ScrollIndicator { }
         ScrollIndicator.horizontal: ScrollIndicator { }
     }
@@ -149,10 +114,10 @@ ApplicationWindow {
     StateGroup{
         states: State {
             name: "READY"
-            when: ocr.loaded
+            when: engine.snapshotLoaded
             StateChangeScript {
                 name: "myScript"
-                script: machine.submitEvent("Loaded")
+                script: machine.submitEvent("SnapshotLoaded")
             }
         }
     }

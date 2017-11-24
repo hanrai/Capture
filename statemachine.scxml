@@ -2,24 +2,36 @@
 <scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="statemachine" datamodel="ecmascript" qt:editorversion="4.4.83" initial="NoSnap">
     <qt:editorinfo initialGeometry="69.63;90.11;-20;-20;40;40"/>
     <state id="NoSnap">
-        <qt:editorinfo geometry="274.43;90.11;-60;-50;120;100" scenegeometry="274.43;90.11;214.43;40.11;120;100"/>
-        <transition type="external" event="Loaded" target="Ready">
+        <qt:editorinfo scenegeometry="274.43;90.11;214.43;40.11;120;100" geometry="274.43;90.11;-60;-50;120;100"/>
+        <transition type="external" event="SnapshotLoaded" target="Ready">
             <qt:editorinfo endTargetFactors="9.76;3.87"/>
         </transition>
-        <onentry>
-            <log label="Started" expr="Started"/>
-        </onentry>
     </state>
     <state id="Ready">
-        <qt:editorinfo geometry="302.08;237.57;-60;-50;353;145" scenegeometry="302.08;237.57;242.08;187.57;353;145"/>
+        <qt:editorinfo scenegeometry="302.08;237.57;242.08;187.57;353;145" geometry="302.08;237.57;-60;-50;353;145"/>
         <transition type="external" event="Button.Clicked" target="GetMousePosition" cond="_event.data.name == &quot;MousePosition&quot;">
             <qt:editorinfo endTargetFactors="46;17.34"/>
         </transition>
     </state>
     <state id="GetMousePosition">
-        <qt:editorinfo geometry="267.27;440.32;-60;-50;183;100" scenegeometry="267.27;440.32;207.27;390.32;183;100"/>
+        <qt:editorinfo scenegeometry="96.27;517.12;36.27;467.12;192;109" geometry="96.27;517.12;-60;-50;192;109"/>
         <transition type="external" event="Mouse.RightClicked" target="Ready">
             <qt:editorinfo endTargetFactors="58.51;81.63"/>
         </transition>
+        <transition type="external" event="Mouse.LeftClicked" target="SetMousePosition">
+            <qt:editorinfo endTargetFactors="73.34;58.82"/>
+        </transition>
+    </state>
+    <state id="SetMousePosition">
+        <qt:editorinfo scenegeometry="69.63;352.26;9.63;302.26;206;100" geometry="69.63;352.26;-60;-50;206;100"/>
+        <transition type="external" target="Ready">
+            <qt:editorinfo endTargetFactors="26.75;44.29"/>
+        </transition>
+        <onentry>
+            <send event="SetMousePosition">
+                <param name="X" expr="_event.data.X"/>
+                <param name="Y" expr="_event.data.Y"/>
+            </send>
+        </onentry>
     </state>
 </scxml>

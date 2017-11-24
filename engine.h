@@ -7,20 +7,20 @@
 #include <QScxmlStateMachine>
 #include "mouseposition.h"
 
-class OCREngine : public QObject, public QQuickImageProvider
+class Engine : public QObject, public QQuickImageProvider
 {
     Q_OBJECT
     Q_PROPERTY(QString snapshot READ snapshot NOTIFY snapshotChanged)
-    Q_PROPERTY(bool loaded READ loaded NOTIFY loadedChanged)
+    Q_PROPERTY(bool snapshotLoaded READ snapshotLoaded NOTIFY snapshotLoadedChanged)
 
 public:
-    explicit OCREngine(QScxmlStateMachine* mc, QObject *parent = nullptr);
+    explicit Engine(QScxmlStateMachine* mc, QObject *parent = nullptr);
 
     QString snapshot() const {
         return snapName;
     }
-    bool loaded() const {
-        return isLoaded;
+    bool snapshotLoaded() const {
+        return isSnapshotLoaded;
     }
 
     MousePosition *getMouseRanger() {return mp;}
@@ -29,13 +29,13 @@ public:
 
 signals:
     void snapshotChanged();
-    void loadedChanged();
+    void snapshotLoadedChanged();
 
 public slots:
     void capture();
 
 private:
-    bool isLoaded;
+    bool isSnapshotLoaded;
     MousePosition *mp;
     Ocr ocr;
     QString snapName;
