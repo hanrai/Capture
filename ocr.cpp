@@ -403,6 +403,11 @@ int Ocr::getScale()
     return scale;
 }
 
+QRgb Ocr::getColor()
+{
+    return color;
+}
+
 bool Ocr::testChar(const QSize &sz)
 {
     QPoint pos(cursorPos);

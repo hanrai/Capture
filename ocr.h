@@ -21,6 +21,7 @@ public:
     QString getString();
     QRect getRect();
     int getScale();
+    QRgb getColor();
 
 private:
     bool testChar(const QSize &sz);

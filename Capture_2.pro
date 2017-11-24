@@ -16,7 +16,8 @@ SOURCES += main.cpp \
     ocr.cpp \
     rect.cpp \
     mouseposition.cpp \
-    engine.cpp
+    engine.cpp \
+    hotspot.cpp
 
 RESOURCES += qml.qrc
 
@@ -35,6 +36,7 @@ HEADERS += \
     ocr.h \
     rect.h \
     mouseposition.h \
-    engine.h
+    engine.h \
+    hotspot.h
 
 DISTFILES +=
