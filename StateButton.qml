@@ -10,7 +10,6 @@ RoundButton {
     enabled: false
 
     property string source
-    property StateMachine stateMachine
     property string name
 
     anchors.verticalCenter: parent.verticalCenter
@@ -36,7 +35,7 @@ RoundButton {
     }
 
     onClicked: {
-        stateMachine.submitEvent("Button.Clicked",
+        machine.submitEvent("Button.Clicked",
                                  {"name": name})
     }
 }

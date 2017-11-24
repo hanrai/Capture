@@ -8,18 +8,9 @@ ApplicationWindow {
     title: qsTr("Capture")
     visible: true
     property var lastVisibility
-    property StateMachine stateMachine
-
-    StateMachineLoader {
-        id: loader
-        source: "qrc:/statemachine.scxml"
-    }
-
-    stateMachine: loader.stateMachine
 
     header: Banner {
         id: banner
-        stateMachine: window.stateMachine
     }
 
     WindowStateSaver{
@@ -89,7 +80,7 @@ ApplicationWindow {
                     leftPadding: 8
                     titleIcon: "qrc:/img/tag.png"
                     titleText: "合约"
-                    enabled: stateMachine.Ready
+                    enabled: machine.Ready
                 }
                 ToolSeparator{
                     orientation: Qt.Horizontal
@@ -118,34 +109,34 @@ ApplicationWindow {
                 hoverEnabled: true
                 acceptedButtons: Qt.AllButtons
                 onPositionChanged: {
-                    stateMachine.submitEvent("Mouse.Moved",
+                    machine.submitEvent("Mouse.Moved",
                         {"X": mouseX, "Y": mouseY})
                 }
                 onClicked: {
                     if(mouse.button & Qt.LeftButton) {
-                        stateMachine.submitEvent("Mouse.LeftClicked",
+                        machine.submitEvent("Mouse.LeftClicked",
                             {"X": mouseX, "Y": mouseY})
                     }
                     if(mouse.button & Qt.RightButton) {
-                        stateMachine.submitEvent("Mouse.RightClicked",
+                        machine.submitEvent("Mouse.RightClicked",
                             {"X": mouseX, "Y": mouseY})
                     }
                     if(mouse.button & Qt.MiddleButton) {
-                        stateMachine.submitEvent("Mouse.MiddleClicked",
+                        machine.submitEvent("Mouse.MiddleClicked",
                             {"X": mouseX, "Y": mouseY})
                     }
                 }
                 onDoubleClicked: {
                     if(mouse.button & Qt.LeftButton) {
-                        stateMachine.submitEvent("Mouse.LeftDoubleClicked",
+                        machine.submitEvent("Mouse.LeftDoubleClicked",
                             {"X": mouseX, "Y": mouseY})
                     }
                     if(mouse.button & Qt.RightButton) {
-                        stateMachine.submitEvent("Mouse.RightDoubleClicked",
+                        machine.submitEvent("Mouse.RightDoubleClicked",
                             {"X": mouseX, "Y": mouseY})
                     }
                     if(mouse.button & Qt.MiddleButton) {
-                        stateMachine.submitEvent("Mouse.MiddleDoubleClicked",
+                        machine.submitEvent("Mouse.MiddleDoubleClicked",
                             {"X": mouseX, "Y": mouseY})
                     }
                 }
@@ -161,7 +152,7 @@ ApplicationWindow {
             when: ocr.loaded
             StateChangeScript {
                 name: "myScript"
-                script: stateMachine.submitEvent("Loaded")
+                script: machine.submitEvent("Loaded")
             }
         }
     }

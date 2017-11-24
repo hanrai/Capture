@@ -17,14 +17,13 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("sophia.com");
     QCoreApplication::setApplicationName("Capture");
 
-    QScxmlStateMachine *machine = QScxmlStateMachine::fromFile("qrc:/statemachine.scxml");
+    QScxmlStateMachine *machine = QScxmlStateMachine::fromFile(":statemachine.scxml");
     if (!machine->parseErrors().isEmpty()) {
         const auto errors = machine->parseErrors();
         for (const QScxmlError &error : errors) {
             qDebug() << error.toString();
         }
     };
-
     OCREngine *ocr = new OCREngine(machine, &app);
 
     qmlRegisterUncreatableType<QScxmlStateMachine>("StateMachine",
@@ -38,6 +37,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("machine", machine);
     engine.addImageProvider("snapshot", ocr);
     machine->start();
+
     engine.load(QUrl(QLatin1String("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;

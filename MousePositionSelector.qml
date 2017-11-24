@@ -6,7 +6,6 @@ Pane {
     id: panel
     property string icon
     property string name
-    property StateMachine stateMachine
     padding: 0
     anchors.verticalCenter: parent.verticalCenter
     background: null
@@ -28,7 +27,6 @@ Pane {
                 radius: 20
                 source: "qrc:/img/target.png"
                 enabled: panel.enabled
-                stateMachine: panel.stateMachine
                 name: panel.name
             }
 

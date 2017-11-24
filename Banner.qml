@@ -2,14 +2,10 @@ import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtScxml 5.8
 
-Frame {
+ToolBar {
     id: banner
-    height: 120
-    topPadding: 8
-    bottomPadding: 8
     opacity: 0.8
     antialiasing: true
-    property StateMachine stateMachine
 
     background: Rectangle {
             color: "white"
@@ -18,15 +14,14 @@ Frame {
         }
 
     Row {
-        leftPadding: 8
+        leftPadding: 20
         spacing: 20
         anchors.fill: parent
 
         StateButton {
             radius: 35
             source: "qrc:/img/photo-camera.svg"
-            enabled: stateMachine.Ready || stateMachine.NoSnap
-            stateMachine: banner.stateMachine
+            enabled: machine.Ready || machine.NoSnap
             name: "SnapShot"
 
             onClicked: {
@@ -39,8 +34,7 @@ Frame {
         VSeparator {}
 
         MousePositionSelector {
-            enabled: stateMachine.Ready || stateMachine.GetMousePosition
-            stateMachine: banner.stateMachine
+            enabled: machine.Ready || machine.GetMousePosition
             name: "MousePosition"
         }
 
@@ -49,7 +43,7 @@ Frame {
         DataDelegate {
             titleIcon: "qrc:/img/tag.png"
             titleText: "合约"
-            enabled: stateMachine.Ready
+            enabled: machine.Ready
         }
 
         VSeparator {}
@@ -57,7 +51,7 @@ Frame {
         DataDelegate {
             titleIcon: "qrc:/img/calendar.png"
             titleText: "日期"
-            enabled: stateMachine.Ready
+            enabled: machine.Ready
         }
 
         VSeparator {}
@@ -65,7 +59,7 @@ Frame {
         DataDelegate {
             titleIcon: "qrc:/img/clock.png"
             titleText: "时间"
-            enabled: stateMachine.Ready
+            enabled: machine.Ready
         }
 
         VSeparator {}
@@ -73,7 +67,7 @@ Frame {
         DataDelegate {
             titleIcon: "qrc:/img/dollar.png"
             titleText: "点位"
-            enabled: stateMachine.Ready
+            enabled: machine.Ready
         }
 
         VSeparator {}
