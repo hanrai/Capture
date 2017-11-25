@@ -3,6 +3,7 @@
 #include <QGuiApplication>
 #include <QPixmap>
 #include <QImage>
+#include <QCursor>
 #include <QUuid>
 
 Engine::Engine(QScxmlStateMachine *mc, QObject *parent) :
@@ -25,6 +26,7 @@ QImage Engine::requestImage(const QString &, QSize *size, const QSize &)
 void Engine::capture()
 {
     QScreen *screen = QGuiApplication::primaryScreen();
+    QCursor::setPos(screen, mp->spotX(), mp->spotY());
     auto pix = screen->grabWindow(0);
     ocr.image = pix.toImage();
     snapName = QUuid::createUuid().toString();
