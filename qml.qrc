@@ -17,6 +17,7 @@
         <file>Workspace.qml</file>
         <file>MousePositionIndicator.qml</file>
         <file>HotSpotIndicator.qml</file>
+        <file>SingleColorIndicator.qml</file>
     </qresource>
     <qresource prefix="/img">
         <file>cursor.png</file>

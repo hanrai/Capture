@@ -1,11 +1,12 @@
-#ifndef HOTSPOT_H
-#define HOTSPOT_H
+#ifndef SINGLECOLOR_H
+#define SINGLECOLOR_H
 
 #include <QObject>
+#include <QSettings>
 #include <QScxmlStateMachine>
-#include "ocr.h"
+#include "hotspot.h"
 
-class HotSpot : public QObject
+class SingleColor : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int spotX READ spotX NOTIFY spotXChanged)
@@ -13,11 +14,10 @@ class HotSpot : public QObject
     Q_PROPERTY(int spotWidth READ spotWidth NOTIFY spotWidthChanged)
     Q_PROPERTY(int spotHeight READ spotHeight NOTIFY spotHeightChanged)
     Q_PROPERTY(bool actived READ actived NOTIFY activedChanged)
-    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-    Q_PROPERTY(QString colorName READ colorName WRITE setColorName NOTIFY colorNameChanged)
+    Q_PROPERTY(QString colorName READ colorName NOTIFY colorNameChanged)
 
 public:
-    explicit HotSpot(Ocr *ocr, QScxmlStateMachine *machine, QObject *parent = nullptr);
+    explicit SingleColor(QString name, QScxmlStateMachine *machine, HotSpot *spot, QObject *parent = nullptr);
 
     int spotX() const
     {
@@ -44,11 +44,6 @@ public:
         return m_actived;
     }
 
-    QString name() const
-    {
-        return m_name;
-    }
-
     QString colorName() const
     {
         return m_colorName;
@@ -65,30 +60,11 @@ signals:
 
     void activedChanged(bool actived);
 
-    void nameChanged(QString name);
-
     void colorNameChanged(QString colorName);
 
 public slots:
-    void setCursor(int x, int y);
-
-    void setName(QString name)
-    {
-        if (m_name == name || name.isEmpty())
-            return;
-
-        m_name = name;
-        emit nameChanged(m_name);
-    }
-
-    void setColorName(QString colorName)
-    {
-        if (m_colorName == colorName)
-            return;
-
-        m_colorName = colorName;
-        emit colorNameChanged(m_colorName);
-    }
+    void setSpot();
+    bool checkActive();
 
 private:
     int m_cursorX;
@@ -98,10 +74,11 @@ private:
     int m_spotWidth;
     int m_spotHeight;
     bool m_actived;
-    Ocr *m_ocr;
     QString m_name;
-    QScxmlStateMachine *m_machine;
     QString m_colorName;
+    QSettings settings;
+    QScxmlStateMachine *m_machine;
+    HotSpot *m_spot;
 };
 
-#endif // HOTSPOT_H
+#endif // SINGLECOLOR_H

@@ -1,5 +1,5 @@
 #include "hotspot.h"
-#include <QtDebug>
+#include <QColor>
 
 HotSpot::HotSpot(Ocr *ocr, QScxmlStateMachine *machine, QObject *parent) : QObject(parent),
     m_spotX(0),
@@ -8,9 +8,10 @@ HotSpot::HotSpot(Ocr *ocr, QScxmlStateMachine *machine, QObject *parent) : QObje
     m_spotHeight(0),
     m_actived(false),
     m_ocr(ocr),
-    m_machine(machine)
+    m_machine(machine),
+    m_colorName("")
 {
-    m_machine->connectToEvent(QLatin1String("HotSpot"), this,
+    m_machine->connectToEvent(QLatin1String("HotSpot.Move"), this,
         [this](const QScxmlEvent &event) {
         auto data = event.data().toMap();
         auto x = data.value("X").toInt();
@@ -18,6 +19,15 @@ HotSpot::HotSpot(Ocr *ocr, QScxmlStateMachine *machine, QObject *parent) : QObje
         auto name = data.value("NAME").toString();
         setCursor(x,y);
         setName(name);
+    });
+
+    m_machine->connectToEvent(QLatin1String("HotSpot.Disable"), this,
+        [this](const QScxmlEvent &) {
+        if(m_actived != false)
+        {
+            m_actived = false;
+            emit activedChanged(m_actived);
+        }
     });
 }
 
@@ -55,34 +65,16 @@ void HotSpot::setCursor(int x, int y)
             m_actived = true;
             emit activedChanged(m_actived);
         }
+
+        QString colorName = QColor(m_ocr->getColor()).name();
+        if(m_colorName != colorName)
+        {
+            m_colorName = colorName;
+            emit colorNameChanged(m_colorName);
+        }
     }
     else
     {
-
-        if(m_spotX != 0)
-        {
-            m_spotX = 0;
-            emit spotXChanged(m_spotX);
-        }
-
-        if(m_spotY != 0)
-        {
-            m_spotY = 0;
-            emit spotYChanged(m_spotY);
-        }
-
-        if(m_spotWidth != 0)
-        {
-            m_spotWidth = 0;
-            emit spotWidthChanged(m_spotWidth);
-        }
-
-        if(m_spotHeight != 0)
-        {
-            m_spotHeight = 0;
-            emit spotHeightChanged(m_spotHeight);
-        }
-
         if(m_actived != false)
         {
             m_actived = false;

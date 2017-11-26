@@ -106,6 +106,9 @@ ApplicationWindow {
             onSourceChanged: {window.visibility = lastVisibility}
             MousePositionIndicator {}
             HotSpotIndicator {}
+            SingleColorIndicator{obj: contractSpot; source: "qrc:/img/tag.png"}
+            SingleColorIndicator{obj: dateSpot; source: "qrc:/img/calendar.png"}
+            SingleColorIndicator{obj: timeSpot; source: "qrc:/img/clock.png"}
         }
 
         ScrollIndicator.vertical: ScrollIndicator { }

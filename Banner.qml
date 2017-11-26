@@ -44,6 +44,11 @@ ToolBar {
             titleIcon: "qrc:/img/tag.png"
             titleText: "合约"
             name: "Contract"
+            spotX: contractSpot.spotX
+            spotY: contractSpot.spotY
+            spotWidth: contractSpot.spotWidth
+            spotHeight: contractSpot.spotHeight
+            colorName: contractSpot.colorName
             enabled: machine.Ready || (machine.HotSpotScan && hotSpot.name == name)
         }
 
@@ -52,7 +57,13 @@ ToolBar {
         DataDelegate {
             titleIcon: "qrc:/img/calendar.png"
             titleText: "日期"
-            enabled: machine.Ready
+            name: "Date"
+            spotX: dateSpot.spotX
+            spotY: dateSpot.spotY
+            spotWidth: dateSpot.spotWidth
+            spotHeight: dateSpot.spotHeight
+            colorName: dateSpot.colorName
+            enabled: machine.Ready || (machine.HotSpotScan && hotSpot.name == name)
         }
 
         VSeparator {}
@@ -60,7 +71,13 @@ ToolBar {
         DataDelegate {
             titleIcon: "qrc:/img/clock.png"
             titleText: "时间"
-            enabled: machine.Ready
+            name: "Time"
+            spotX: timeSpot.spotX
+            spotY: timeSpot.spotY
+            spotWidth: timeSpot.spotWidth
+            spotHeight: timeSpot.spotHeight
+            colorName: timeSpot.colorName
+            enabled: machine.Ready || (machine.HotSpotScan && hotSpot.name == name)
         }
 
         VSeparator {}

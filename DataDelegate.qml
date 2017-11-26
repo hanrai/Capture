@@ -6,6 +6,11 @@ Pane {
     property string titleIcon
     property string titleText
     property alias name: button.name
+    property int spotX
+    property int spotY
+    property int spotWidth
+    property int spotHeight
+    property string colorName
     padding: 0
     anchors.verticalCenter: parent.verticalCenter
     background: null
@@ -38,16 +43,16 @@ Pane {
                 spacing: 4
                 LabelText {text: "X"}
                 LabelText {text: ":"}
-                DataText {txt: "8888"}
+                DataText {txt: spotX}
                 LabelText {text: "Y"}
                 LabelText {text: ":"}
-                DataText {txt: "8888"}
+                DataText {txt: spotY}
                 LabelText {text: "W"}
                 LabelText {text: ":"}
-                DataText {txt: "8888"}
+                DataText {txt: spotWidth}
                 LabelText {text: "H"}
                 LabelText {text: ":"}
-                DataText {txt: "8888"}
+                DataText {txt: spotHeight}
             }
         }
         HSeparator {}
@@ -65,7 +70,7 @@ Pane {
                     width: 12
                     height: 12
                     radius: 6
-                    color: "red"
+                    color: colorName
                     border.color: "black"
                 }
             }

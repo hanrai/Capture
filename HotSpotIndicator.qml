@@ -18,4 +18,5 @@ Button {
 
     background: null
 
+    onClicked: { machine.submitEvent("HotSpot.Clicked") }
 }
