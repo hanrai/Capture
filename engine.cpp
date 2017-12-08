@@ -6,6 +6,7 @@
 #include <QCursor>
 #include <QUuid>
 #include <QtDebug>
+#include <QElapsedTimer>
 
 Engine::Engine(QScxmlStateMachine *mc, QObject *parent) :
     QObject(parent),
@@ -29,9 +30,17 @@ QImage Engine::requestImage(const QString &, QSize *size, const QSize &)
 
 void Engine::capture()
 {
-    QScreen *screen = QGuiApplication::primaryScreen();
-    auto pix = screen->grabWindow(0);
-    ocr.image = pix.toImage();
+    QElapsedTimer timer;
+    timer.start();
+    for(int i=0; i<1; i++)
+    {
+
+        m_duplication.takeSnapshots();
+        ocr.image = m_duplication.getSnapshots().at(0);
+    }
+
+    qDebug() << "FPS:" << timer.elapsed();
+
     snapName = QUuid::createUuid().toString();
 
     if(!isSnapshotLoaded)

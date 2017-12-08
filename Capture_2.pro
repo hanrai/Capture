@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     mouseposition.cpp \
     engine.cpp \
     hotspot.cpp \
-    singlecolor.cpp
+    singlecolor.cpp \
+    desktopduplication.cpp
 
 RESOURCES += qml.qrc
 
@@ -39,6 +40,23 @@ HEADERS += \
     mouseposition.h \
     engine.h \
     hotspot.h \
-    singlecolor.h
+    singlecolor.h \
+    desktopduplication.h
 
 DISTFILES +=
+
+win32: LIBS += -L'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64/' -ld3d11
+
+INCLUDEPATH += 'C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/um'
+INCLUDEPATH += 'C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/winrt/wrl'
+DEPENDPATH += 'C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/um'
+
+win32:!win32-g++: PRE_TARGETDEPS += 'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64/d3d11.lib'
+else:win32-g++: PRE_TARGETDEPS += 'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64/libd3d11.a'
+
+win32: LIBS += -L'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64/' -ldxgi
+
+INCLUDEPATH += 'C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/um'
+
+win32:!win32-g++: PRE_TARGETDEPS += 'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64/dxgi.lib'
+else:win32-g++: PRE_TARGETDEPS += 'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64/libdxgi.a'

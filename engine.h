@@ -10,6 +10,7 @@
 #include <QTime>
 #include <QCoreApplication>
 #include "singlecolor.h"
+#include "desktopduplication.h"
 
 class Engine : public QObject, public QQuickImageProvider
 {
@@ -60,6 +61,7 @@ private:
     SingleColor *m_contractSpot;
     SingleColor *m_dateSpot;
     SingleColor *m_timeSpot;
+    DesktopDuplication m_duplication;
 };
 
 #endif // OCRENGINE_H

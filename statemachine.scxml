@@ -1,75 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="statemachine" datamodel="ecmascript" qt:editorversion="4.4.83" initial="NoSnap">
-    <qt:editorinfo initialGeometry="69.63;90.11;-20;-20;40;40"/>
-    <state id="NoSnap">
-        <qt:editorinfo geometry="274.43;90.11;-60;-50;120;100" scenegeometry="274.43;90.11;214.43;40.11;120;100"/>
-        <transition type="external" event="SnapshotLoaded" target="Ready">
-            <qt:editorinfo endTargetFactors="9.76;3.87"/>
-        </transition>
-    </state>
-    <state id="Ready">
-        <qt:editorinfo geometry="378.08;195.57;-60;-53.09;529.92;268.09" scenegeometry="378.08;195.57;318.08;142.48;529.92;268.09"/>
-        <transition type="external" event="Button.Clicked" target="GetMousePosition" cond="_event.data.name == &quot;MousePosition&quot;">
-            <qt:editorinfo endTargetFactors="46;17.34"/>
-        </transition>
-        <transition type="external" event="Button.Clicked" target="HotSpotScan" cond="_event.data.name != &quot;MousePosition&quot; &amp;&amp; _event.data.name != &quot;SnapShot&quot;"/>
-    </state>
-    <state id="GetMousePosition">
-        <qt:editorinfo geometry="96.27;517.12;-60;-50;192;109" scenegeometry="96.27;517.12;36.27;467.12;192;109"/>
-        <transition type="external" event="Mouse.RightClicked" target="Ready">
-            <qt:editorinfo endTargetFactors="58.51;81.63"/>
-        </transition>
-        <transition type="external" event="Mouse.LeftClicked" target="SetMousePosition">
-            <qt:editorinfo endTargetFactors="73.34;58.82"/>
-        </transition>
-    </state>
-    <state id="SetMousePosition">
-        <qt:editorinfo geometry="69.63;352.26;-60;-50;206;100" scenegeometry="69.63;352.26;9.63;302.26;206;100"/>
-        <transition type="external" target="Ready">
-            <qt:editorinfo endTargetFactors="26.75;44.29"/>
-        </transition>
-        <onentry>
-            <send event="SetMousePosition">
-                <param name="X" expr="_event.data.X"/>
-                <param name="Y" expr="_event.data.Y"/>
-            </send>
-        </onentry>
-    </state>
-    <state id="HotSpotScan">
-        <qt:editorinfo geometry="463.54;582.57;-158;-50;269;159" scenegeometry="463.54;582.57;305.54;532.57;269;159"/>
-        <transition type="internal" event="Mouse.Moved">
-            <qt:editorinfo endTargetFactors="21.01;45.84"/>
-            <send event="HotSpot.Move">
-                <param name="X" expr="_event.data.X"/>
-                <param name="Y" expr="_event.data.Y"/>
-                <param name="NAME" expr="hotSpotName"/>
-            </send>
-            <log label="test" expr="testtext"/>
-        </transition>
-        <transition type="external" event="Mouse.RightClicked" target="Ready">
-            <qt:editorinfo endTargetFactors="79.11;71.07"/>
-            <send event="HotSpot.Disable"/>
-        </transition>
-        <onentry>
-            <send event="HotSpot">
-                <param name="X" expr="_event.data.X"/>
-                <param name="Y" expr="_event.data.Y"/>
-                <param name="NAME" expr="_event.data.name"/>
-            </send>
-            <assign location="hotSpotName" expr="_event.data.name"/>
-        </onentry>
-        <datamodel>
-            <data id="hotSpotName"/>
-        </datamodel>
-        <transition type="external" event="HotSpot.Clicked" target="SetDataSpot">
-            <qt:editorinfo endTargetFactors="15.36;59.95"/>
-            <send event="HotSpot.Disable"/>
-        </transition>
-    </state>
-    <state id="SetDataSpot">
-        <qt:editorinfo geometry="771.07;591.59;-60;-50;120;100" scenegeometry="771.07;591.59;711.07;541.59;120;100"/>
-        <transition type="external" target="Ready">
-            <qt:editorinfo endTargetFactors="77.13;81.70"/>
-        </transition>
-    </state>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="statemachine" datamodel="ecmascript" qt:editorversion="4.4.83">
+    <parallel id="StateMachine">
+        <qt:editorinfo geometry="671;616;-518.83;-670.82;1243.76;1270.82" scenegeometry="671;616;152.17;-54.82;1243.76;1270.82"/>
+        <state id="Main" initial="NoSnap">
+            <qt:editorinfo geometry="173;-402;-669.57;-152.57;966.57;695.57" removedInitial="StateMachine::Main::NoSnap" scenegeometry="844;214;174.43;61.43;966.57;695.57"/>
+            <state id="SnapShot">
+                <qt:editorinfo geometry="-17;-8;-60;-50;120;100" scenegeometry="827;206;767;156;120;100"/>
+            </state>
+            <state id="Ready">
+                <qt:editorinfo geometry="-35.67;127.16;-172;-50.91;436.96;181.86" scenegeometry="808.33;341.16;636.33;290.25;436.96;181.86"/>
+                <transition type="external" event="Button.Clicked" cond="_event.data.name == &quot;MousePosition&quot;"/>
+                <transition type="external" event="Button.Clicked" cond="_event.data.name != &quot;MousePosition&quot; &amp;&amp; _event.data.name != &quot;SnapShot&quot;"/>
+            </state>
+            <state id="SetDataSpot">
+                <qt:editorinfo geometry="198.93;409.59;-106;-50;166;100" scenegeometry="1042.93;623.59;936.93;573.59;166;100"/>
+                <transition type="external"/>
+            </state>
+            <state id="SetMousePosition">
+                <qt:editorinfo geometry="-428.53;188.79;-106;-50;252;100" scenegeometry="415.47;402.79;309.47;352.79;252;100"/>
+                <transition type="external"/>
+                <onentry>
+                    <send event="SetMousePosition">
+                        <param name="X" expr="_event.data.X"/>
+                        <param name="Y" expr="_event.data.Y"/>
+                    </send>
+                </onentry>
+            </state>
+            <state id="GetMousePosition">
+                <qt:editorinfo geometry="-427.40;358.59;-200;-50;332;116" scenegeometry="416.60;572.59;216.60;522.59;332;116"/>
+                <transition type="external" event="Mouse.RightClicked"/>
+                <transition type="external" event="Mouse.LeftClicked"/>
+            </state>
+            <state id="NoSnap">
+                <qt:editorinfo geometry="-477.57;-5.89;-172;-50;232;116" scenegeometry="366.43;208.11;194.43;158.11;232;116"/>
+                <transition type="external" event="SnapshotLoaded"/>
+                <transition type="external" event="Transition_1"/>
+            </state>
+            <state id="HotSpotScan">
+                <qt:editorinfo geometry="-67.64;380.09;-200;-50;311;159" scenegeometry="776.36;594.09;576.36;544.09;311;159"/>
+                <transition type="internal" event="Mouse.Moved">
+                    <send event="HotSpot.Move">
+                        <param name="X" expr="_event.data.X"/>
+                        <param name="Y" expr="_event.data.Y"/>
+                        <param name="NAME" expr="hotSpotName"/>
+                    </send>
+                    <log label="test" expr="testtext"/>
+                </transition>
+                <transition type="external" event="Mouse.RightClicked">
+                    <send event="HotSpot.Disable"/>
+                </transition>
+                <onentry>
+                    <send event="HotSpot">
+                        <param name="X" expr="_event.data.X"/>
+                        <param name="Y" expr="_event.data.Y"/>
+                        <param name="NAME" expr="_event.data.name"/>
+                    </send>
+                    <assign location="hotSpotName" expr="_event.data.name"/>
+                </onentry>
+                <datamodel>
+                    <data id="hotSpotName"/>
+                </datamodel>
+                <transition type="external" event="HotSpot.Clicked">
+                    <send event="HotSpot.Disable"/>
+                </transition>
+            </state>
+        </state>
+        <state id="ToolButton">
+            <qt:editorinfo geometry="-438.83;223.03;-60;-52.49;959;256.49" scenegeometry="232.17;839.03;172.17;786.54;959;256.49"/>
+            <state id="Idle">
+                <qt:editorinfo geometry="116.08;76.41;-60;-50;120;100" scenegeometry="348.25;915.44;288.25;865.44;120;100"/>
+                <transition type="external" event="ToolButton.Clicked" target="Active"/>
+            </state>
+            <state id="Active">
+                <qt:editorinfo geometry="552.17;76.41;-60;-50;120;100" scenegeometry="784.34;915.44;724.34;865.44;120;100"/>
+            </state>
+        </state>
+    </parallel>
 </scxml>
