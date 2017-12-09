@@ -16,21 +16,24 @@ public:
     explicit DesktopDuplication(QObject *parent = nullptr);
     void Init();
     bool isInitialized() {return m_initialized;}
-    void takeSnapshots();
-    QVector<QImage> getSnapshots() {return m_snapshots;}
     void Reset();
+    int getOutputCount() {return m_outputs.size();}
+    int getOutputID() {return m_outputID;}
+    bool setOutputID(int id);
+    QImage takeSnapshot();
 
 signals:
 
 public slots:
 private:
-    bool m_initialized;
-    QVector<ComPtr<ID3D11DeviceContext>>    m_contexts;
+    bool                                    m_initialized;
     QVector<ComPtr<IDXGIOutput1>>           m_outputs;
-    QVector<ComPtr<ID3D11Device>>           m_devices;
-    QVector<ComPtr<IDXGIOutputDuplication>> m_duplications;
-    QVector<QImage>                         m_snapshots;
-    QVector<ComPtr<ID3D11Texture2D>>        m_textures;
+    int                                     m_outputID;
+    ComPtr<ID3D11Device>                    m_device;
+    ComPtr<ID3D11DeviceContext>             m_context;
+    ComPtr<IDXGIOutputDuplication>          m_duplication;
+    ComPtr<ID3D11Texture2D>                 m_stagingTexture;
+    QImage                                  m_snapshot;
 };
 
 #endif // DESKTOPDUPLICATION_H
