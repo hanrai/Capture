@@ -39,7 +39,7 @@ void Engine::capture()
         ocr.image = m_duplication.getSnapshots().at(0);
     }
 
-    qDebug() << "FPS:" << timer.elapsed();
+    qDebug() << "FPS:" << 1000/timer.elapsed();
 
     snapName = QUuid::createUuid().toString();
 

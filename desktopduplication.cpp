@@ -8,7 +8,7 @@ DesktopDuplication::DesktopDuplication(QObject *parent) :
     m_initialized(false)
 {
     Init();
-    takeSnapshots();
+    //takeSnapshots();
 }
 
 void DesktopDuplication::Init()
@@ -51,20 +51,27 @@ void DesktopDuplication::Init()
                         ComPtr<ID3D11Device> pDevice;
                         ComPtr<ID3D11DeviceContext> pContext;
                         D3D_FEATURE_LEVEL FeatureLevel;
+                        D3D_FEATURE_LEVEL FeatureLevels[] = {
+                            D3D_FEATURE_LEVEL_12_1,
+                            D3D_FEATURE_LEVEL_12_0,
+                            D3D_FEATURE_LEVEL_11_1,
+                            D3D_FEATURE_LEVEL_11_0,
+                            D3D_FEATURE_LEVEL_10_1,
+                            D3D_FEATURE_LEVEL_10_0};
                         hr = D3D11CreateDevice(
                                     pAdapter.Get(),             //pAdapter [in, optional]
                                     D3D_DRIVER_TYPE_UNKNOWN,    //DriverType
                                     nullptr,                    //Software
-                                    NULL,                       //Flags
-                                    nullptr,                    //pFeatureLevels
-                                    0,                          //FeatureLevels
+                                    D3D11_CREATE_DEVICE_DEBUG,  //Flags
+                                    FeatureLevels,              //pFeatureLevels
+                                    ARRAYSIZE(FeatureLevels),   //FeatureLevels
                                     D3D11_SDK_VERSION,          //SDKVersion
                                     &pDevice,                   //ppDevice
                                     &FeatureLevel,              //pFeatureLevel
                                     &pContext);                 //context
                         if(SUCCEEDED(hr))
                         {
-                            qDebug()<<"D3DDevice created";
+                            qDebug()<<"D3DDevice created:"<<(void*)FeatureLevel;
 
                             m_outputs.push_back(pOutput1);
                             m_devices.push_back(pDevice);
@@ -96,11 +103,9 @@ void DesktopDuplication::takeSnapshots()
 
     m_snapshots.clear();
 
-    QImage result;
-
     for(int i=0; i<m_outputs.size(); i++)
     {
-        //qDebug()<<"Create snapshot for output: "<<i;
+        qDebug()<<"Create snapshot for output: "<<i;
         ComPtr<IDXGIOutputDuplication> pDuplication;
         auto pOutput = m_outputs.at(i);
         auto pDevice = m_devices.at(i);
@@ -108,27 +113,27 @@ void DesktopDuplication::takeSnapshots()
         hr = pOutput->DuplicateOutput(pDevice.Get(), &pDuplication);
         if(SUCCEEDED(hr))
         {
-            //qDebug()<<"Duplication interface get.";
+            qDebug()<<"Duplication interface get.";
 
             DXGI_OUTDUPL_DESC duplDesc;
             pDuplication->GetDesc(&duplDesc);
-            //qDebug()<<"DesktopImageInSystemMemory:"<<(bool)duplDesc.DesktopImageInSystemMemory;
+            qDebug()<<"DesktopImageInSystemMemory:"<<(bool)duplDesc.DesktopImageInSystemMemory;
 
             DXGI_OUTDUPL_FRAME_INFO info;
             ComPtr<IDXGIResource> resource;
             hr = pDuplication->AcquireNextFrame(
-                        300,                        //TimeoutInMilliseconds
+                        3000,                        //TimeoutInMilliseconds
                         &info,                      //pFrameInfo
                         &resource);                 //ppDesktopResource
             if(SUCCEEDED(hr))
             {
-                //qDebug()<<"Frame get.";
+                qDebug()<<"Frame get.";
                 D3D11_TEXTURE2D_DESC frameDescriptor;
                 ComPtr<ID3D11Texture2D> frameTexture;
                 hr = resource.As(&frameTexture);
                 if(SUCCEEDED(hr))
                 {
-                    //qDebug()<<"Texture of frame get.";
+                    qDebug()<<"Texture of frame get.";
                     frameTexture->GetDesc(&frameDescriptor);
                     frameDescriptor.Usage = D3D11_USAGE_STAGING;
                     frameDescriptor.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
@@ -142,10 +147,10 @@ void DesktopDuplication::takeSnapshots()
                     hr = pDevice->CreateTexture2D(&frameDescriptor, NULL, &stagingTexture);
                     if(SUCCEEDED(hr))
                     {
-                        //qDebug()<<"Staging texture get.";
+                        qDebug()<<"Staging texture get.";
                         auto context = m_contexts.at(i);
                         context->CopyResource(stagingTexture.Get(), frameTexture.Get());
-                        //qDebug()<<"Resource copied.";
+                        qDebug()<<"Resource copied.";
 
                         D3D11_MAPPED_SUBRESOURCE mapInfo;
                         hr = context->Map(
@@ -156,12 +161,19 @@ void DesktopDuplication::takeSnapshots()
                                     &mapInfo);
                         if(SUCCEEDED(hr))
                         {
-                            //qDebug()<<"Texture mapped.";
-                            result = QImage(
+                            qDebug()<<"Texture mapped.";
+                            auto result = QImage(
                                         frameDescriptor.Width,
                                         frameDescriptor.Height,
                                         QImage::Format_ARGB32);
-                            memcpy(result.bits(), mapInfo.pData, result.width()*result.height()*4);
+                            for(int i=0; i<result.height(); i++)
+                            {
+                                memcpy(
+                                    (void*)((char*)result.bits()+i*result.width()*4),
+                                    (void*)((char*)mapInfo.pData+i*mapInfo.RowPitch),
+                                    result.width()*4
+                                      );
+                            }
                             m_snapshots.push_back(result);
                         }
                         context->Unmap(stagingTexture.Get(), 0);
