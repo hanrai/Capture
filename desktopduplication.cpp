@@ -2,16 +2,138 @@
 #include "desktopduplication.h"
 #include <QtDebug>
 #include <dxgi1_6.h>
+#include <stdexcept>
 
-DesktopDuplication::DesktopDuplication(QObject *parent) :
-    QObject(parent)
+// These are the errors we expect from general Dxgi API due to a transition
+HRESULT SystemTransitionsExpectedErrors[] = {
+                                                DXGI_ERROR_DEVICE_REMOVED,
+                                                DXGI_ERROR_ACCESS_LOST,
+                                                static_cast<HRESULT>(WAIT_ABANDONED),
+                                                S_OK                                    // Terminate list with zero valued HRESULT
+                                            };
+
+// These are the errors we expect from IDXGIOutput1::DuplicateOutput due to a transition
+HRESULT CreateDuplicationExpectedErrors[] = {
+                                                DXGI_ERROR_DEVICE_REMOVED,
+                                                static_cast<HRESULT>(E_ACCESSDENIED),
+                                                DXGI_ERROR_UNSUPPORTED,
+                                                DXGI_ERROR_SESSION_DISCONNECTED,
+                                                S_OK                                    // Terminate list with zero valued HRESULT
+                                            };
+
+// These are the errors we expect from IDXGIOutputDuplication methods due to a transition
+HRESULT FrameInfoExpectedErrors[] = {
+                                        DXGI_ERROR_DEVICE_REMOVED,
+                                        DXGI_ERROR_ACCESS_LOST,
+                                        S_OK                                    // Terminate list with zero valued HRESULT
+                                    };
+
+// These are the errors we expect from IDXGIAdapter::EnumOutputs methods due to outputs becoming stale during a transition
+HRESULT EnumOutputsExpectedErrors[] = {
+                                          DXGI_ERROR_NOT_FOUND,
+                                          S_OK                                    // Terminate list with zero valued HRESULT
+                                      };
+
+//
+// Displays a message
+//
+void DisplayMsg(_In_ LPCWSTR Str, _In_ LPCWSTR Title, HRESULT hr)
 {
-    Init();
+    if (SUCCEEDED(hr))
+    {
+        MessageBoxW(nullptr, Str, Title, MB_OK);
+        return;
+    }
+
+    const UINT StringLen = (UINT)(wcslen(Str) + sizeof(" with HRESULT 0x########."));
+    wchar_t* OutStr = new wchar_t[StringLen];
+    if (!OutStr)
+    {
+        return;
+    }
+
+    INT LenWritten = swprintf_s(OutStr, StringLen, L"%s with 0x%X.", Str, hr);
+    if (LenWritten != -1)
+    {
+        MessageBoxW(nullptr, OutStr, Title, MB_OK);
+    }
+
+    delete [] OutStr;
 }
 
-void DesktopDuplication::Init()
+bool ProcessFailure(_In_opt_ ID3D11Device* Device, _In_ LPCWSTR Str, _In_ LPCWSTR Title, HRESULT hr, _In_opt_z_ HRESULT* ExpectedErrors)
 {
-    Reset();
+    HRESULT TranslatedHr;
+
+    // On an error check if the DX device is lost
+    if (Device)
+    {
+        HRESULT DeviceRemovedReason = Device->GetDeviceRemovedReason();
+
+        switch (DeviceRemovedReason)
+        {
+            case DXGI_ERROR_DEVICE_REMOVED :
+            case DXGI_ERROR_DEVICE_RESET :
+            case static_cast<HRESULT>(E_OUTOFMEMORY) :
+            {
+                // Our device has been stopped due to an external event on the GPU so map them all to
+                // device removed and continue processing the condition
+                TranslatedHr = DXGI_ERROR_DEVICE_REMOVED;
+                break;
+            }
+
+            case S_OK :
+            {
+                // Device is not removed so use original error
+                TranslatedHr = hr;
+                break;
+            }
+
+            default :
+            {
+                // Device is removed but not a error we want to remap
+                TranslatedHr = DeviceRemovedReason;
+            }
+        }
+    }
+    else
+    {
+        TranslatedHr = hr;
+    }
+
+    // Check if this error was expected or not
+    if (ExpectedErrors)
+    {
+        HRESULT* CurrentResult = ExpectedErrors;
+
+        while (*CurrentResult != S_OK)
+        {
+            if (*(CurrentResult++) == TranslatedHr)
+            {
+                return DUPL_RETURN_ERROR_EXPECTED;
+            }
+        }
+    }
+
+    // Error was not expected so display the message box
+    DisplayMsg(Str, Title, TranslatedHr);
+
+    return DUPL_RETURN_ERROR_UNEXPECTED;
+}
+
+DesktopDuplication::DesktopDuplication(QObject *parent) :
+    QObject(parent),
+    m_initialized(false)
+{
+    initialize();
+}
+
+void DesktopDuplication::initialize()
+{
+    if(m_initialized)
+        reset();
+
+    DUPL_RETURN dr = prepareOutputMap();
     //
     //Create a DXGI Factory first.
     //
@@ -37,6 +159,7 @@ void DesktopDuplication::Init()
             }
         }
     }
+    qDebug()<<"Outputs:"<<m_outputs.size();
     if(FAILED(hr))
     {
         qCritical()<<"Init error:"<<(void*)hr;
@@ -50,9 +173,11 @@ void DesktopDuplication::Init()
     m_initialized = true;
 }
 
-void DesktopDuplication::Reset()
+void DesktopDuplication::reset()
 {
     m_initialized = false;
+    m_outputMap.clear();
+    ///old part
     m_outputs.clear();
     m_outputID = -1;
     m_device.Reset();
@@ -61,10 +186,75 @@ void DesktopDuplication::Reset()
     m_stagingTexture.Reset();
 }
 
+DUPL_RETURN DesktopDuplication::begin()
+{
+    DUPL_RETURN result = DUPL_RETURN_SUCCESS;
+    if(m_outputMap.isEmpty())
+    {
+        result = prepareOutputMap();
+    }
+    return result;
+}
+
+bool DesktopDuplication::prepareOutputMap()
+{
+    m_outputMap.clear();
+
+    ComPtr<IDXGIFactory> pFactory;
+    HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(pFactory.GetAddressOf()));
+    if (FAILED(hr))
+    {
+        return ProcessFailure(nullptr, L"Failed to get DXGI Factory", L"Error", hr, SystemTransitionsExpectedErrors);
+    }
+
+    for(int adapterCount = 0; SUCCEEDED(hr); ++adapterCount)
+    {
+        ComPtr<IDXGIAdapter> pAdapter;
+        hr = pFactory->EnumAdapters(adapterCount, &pAdapter);
+        if(pAdapter.Get() && (hr != DXGI_ERROR_NOT_FOUND))
+        {
+            HRESULT ho = S_OK;
+            for(int outputCount = 0; SUCCEEDED(ho); ++outputCount)
+            {
+                ComPtr<IDXGIOutput> pOutput;
+                ho = pAdapter->EnumOutputs(outputCount, &pOutput);
+                if(pOutput.Get() && (ho != DXGI_ERROR_NOT_FOUND))
+                {
+                    m_outputMap.append(adapterCount);
+                }
+            }
+        }
+    }
+
+    if(m_outputMap.isEmpty())
+    {
+        return DUPL_RETURN_ERROR_EXPECTED;
+    }
+
+    return DUPL_RETURN_SUCCESS;
+}
+
+DUPL_RETURN DesktopDuplication::trySanpshot(unsigned int output)
+{
+    if(output >= m_outputMap.size())
+    {
+        prepareOutputMap();
+    }
+
+    if(m_outputMap.isEmpty())
+    {
+        return DUPL_RETURN_ERROR_EXPECTED;
+    }
+
+    if(output >= m_outputMap.size())
+        throw std::out_of_range(L"Output not available!");
+    return DUPL_RETURN_SUCCESS;
+}
+
 bool DesktopDuplication::setOutputID(int id)
 {
     if(!m_initialized)
-        Init();
+        initialize();
 
     if(id<0 || id>=m_outputs.size())
     {
@@ -93,7 +283,7 @@ bool DesktopDuplication::setOutputID(int id)
                     pAdapter.Get(),             //pAdapter [in, optional]
                     D3D_DRIVER_TYPE_UNKNOWN,    //DriverType
                     nullptr,                    //Software
-                    D3D11_CREATE_DEVICE_DEBUG,  //Flags
+                    /*D3D11_CREATE_DEVICE_DEBUG*/0,  //Flags
                     FeatureLevels,              //pFeatureLevels
                     ARRAYSIZE(FeatureLevels),   //FeatureLevels
                     D3D11_SDK_VERSION,          //SDKVersion
@@ -146,6 +336,7 @@ QImage DesktopDuplication::takeSnapshot()
                 &resource);                 //ppDesktopResource
     if(SUCCEEDED(hr))
     {
+        //qDebug()<<info.AccumulatedFrames;
         ComPtr<ID3D11Texture2D> frameTexture;
         hr = resource.As(&frameTexture);
         if(SUCCEEDED(hr))
@@ -161,7 +352,7 @@ QImage DesktopDuplication::takeSnapshot()
                         &mapInfo);
             if(SUCCEEDED(hr))
             {
-                qDebug()<<"Texture mapped.";
+                //qDebug()<<"Texture mapped.";
                 for(int i=0; i<m_snapshot.height(); i++)
                 {
                     memcpy(
@@ -173,6 +364,45 @@ QImage DesktopDuplication::takeSnapshot()
             }
             m_context->Unmap(m_stagingTexture.Get(), 0);
         }
+        hr = m_duplication->ReleaseFrame();
     }
+    else
+        qDebug()<<(void*)hr;
+
+//qDebug()<<(void*)hr;
     return m_snapshot;
+}
+
+bool DesktopDuplication::takeSnapshot(unsigned int output, SnapshotInfo *info)
+{
+    DUPL_RETURN ret = DUPL_RETURN_SUCCESS;
+    info->buffer = nullptr;
+    forever
+    {
+        ret = trySnapshot(output);
+        if(ret == DUPL_RETURN_ERROR_EXPECTED)
+        {
+            m_wait.Wait();
+            continue;
+        }
+//        if(output >= m_outputMap.size())
+//        {
+//            ret = prepareOutputMap();
+//        }
+//        if(ret != DUPL_RETURN_SUCCESS)
+//        {
+//            if(ret == DUPL_RETURN_ERROR_EXPECTED)
+//            {
+//                m_wait.Wait();
+//                continue;
+//            }
+//            else
+//            {
+//                DisplayMsg("Wrong output index, out of boudn", "Wrong arg", DXGI_ERROR_NOT_FOUND);
+//                return QImage();
+//            }
+//        }
+        //Reduce content, just test return once
+    }
+    return QImage();//temp
 }

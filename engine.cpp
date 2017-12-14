@@ -30,19 +30,19 @@ QImage Engine::requestImage(const QString &, QSize *size, const QSize &)
 
 void Engine::capture()
 {
-    qDebug()<<m_duplication.getOutputCount();
-    m_duplication.setOutputID(0);
+    m_duplication.setOutputID(1);
 
     QElapsedTimer timer;
     timer.start();
 
-    for(int i=0; i<1000; i++)
+    int c=1000;
+
+    for(int i=0; i<c; i++)
     {
         ocr.image = m_duplication.takeSnapshot();
-        qDebug()<<i;
     }
 
-    qDebug() << "FPS:" << timer.elapsed();
+    qDebug() << "FPS:" << 1000*c/(timer.elapsed());
 
     snapName = QUuid::createUuid().toString();
 

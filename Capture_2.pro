@@ -19,7 +19,8 @@ SOURCES += main.cpp \
     engine.cpp \
     hotspot.cpp \
     singlecolor.cpp \
-    desktopduplication.cpp
+    desktopduplication.cpp \
+    dynamic_wait.cpp
 
 RESOURCES += qml.qrc
 
@@ -41,7 +42,8 @@ HEADERS += \
     engine.h \
     hotspot.h \
     singlecolor.h \
-    desktopduplication.h
+    desktopduplication.h \
+    dynamic_wait.h
 
 DISTFILES +=
 
@@ -60,3 +62,11 @@ INCLUDEPATH += 'C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/um'
 
 win32:!win32-g++: PRE_TARGETDEPS += 'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64/dxgi.lib'
 else:win32-g++: PRE_TARGETDEPS += 'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64/libdxgi.a'
+
+win32: LIBS += -L'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64/' -lUser32
+
+INCLUDEPATH += 'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64'
+DEPENDPATH += 'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64'
+
+win32:!win32-g++: PRE_TARGETDEPS += 'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64/User32.lib'
+else:win32-g++: PRE_TARGETDEPS += 'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64/libUser32.a'
