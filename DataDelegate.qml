@@ -13,9 +13,15 @@ Pane {
     property string colorName
     padding: 0
     anchors.verticalCenter: parent.verticalCenter
-    background: null
     opacity: 0.1
     enabled: false
+
+    background: Rectangle {
+        id:bgc
+        anchors.fill: parent
+        color: "blueviolet"
+        opacity: 0
+    }
 
     Column {
         CellTitle {
@@ -79,14 +85,27 @@ Pane {
 
     states: [
         State {
+            name: "ACTIVED"
+            extend: "ENABLED"
+            when: button.name === engine.actionName
+            PropertyChanges { target: bgc; opacity: 0.1 }
+        },
+        State {
             name: "ENABLED"
             when: panel.enabled
             PropertyChanges { target: panel; opacity: 0.8 }
         }
+
     ]
 
-    transitions: Transition {
-        from: ""; to: "ENABLED"; reversible: true
-        NumberAnimation { properties: "opacity"; duration: 100}
-    }
+    transitions: [
+        Transition {
+            from: ""; to: "ENABLED"; reversible: true
+            NumberAnimation { properties: "opacity"; duration: 100}
+        },
+        Transition {
+            from: "ENABLED"; to: "ACTIVED"; reversible: true
+            NumberAnimation { properties: "opacity"; duration: 100}
+        }
+    ]
 }

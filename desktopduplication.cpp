@@ -3,6 +3,7 @@
 #include <QtDebug>
 #include <dxgi1_6.h>
 #include <stdexcept>
+#include <QCoreApplication>
 
 // These are the errors we expect from general Dxgi API due to a transition
 HRESULT SystemTransitionsExpectedErrors[] = {
@@ -34,34 +35,7 @@ HRESULT EnumOutputsExpectedErrors[] = {
                                           S_OK                                    // Terminate list with zero valued HRESULT
                                       };
 
-//
-// Displays a message
-//
-void DisplayMsg(_In_ LPCWSTR Str, _In_ LPCWSTR Title, HRESULT hr)
-{
-    if (SUCCEEDED(hr))
-    {
-        MessageBoxW(nullptr, Str, Title, MB_OK);
-        return;
-    }
-
-    const UINT StringLen = (UINT)(wcslen(Str) + sizeof(" with HRESULT 0x########."));
-    wchar_t* OutStr = new wchar_t[StringLen];
-    if (!OutStr)
-    {
-        return;
-    }
-
-    INT LenWritten = swprintf_s(OutStr, StringLen, L"%s with 0x%X.", Str, hr);
-    if (LenWritten != -1)
-    {
-        MessageBoxW(nullptr, OutStr, Title, MB_OK);
-    }
-
-    delete [] OutStr;
-}
-
-bool ProcessFailure(_In_opt_ ID3D11Device* Device, _In_ LPCWSTR Str, _In_ LPCWSTR Title, HRESULT hr, _In_opt_z_ HRESULT* ExpectedErrors)
+void DesktopDuplication::ProcessFailure(const char* file, int line, _In_opt_ ID3D11Device* Device, _In_ LPCWSTR Str, _In_ LPCWSTR Title, HRESULT hr, _In_opt_z_ HRESULT* ExpectedErrors)
 {
     HRESULT TranslatedHr;
 
@@ -110,115 +84,456 @@ bool ProcessFailure(_In_opt_ ID3D11Device* Device, _In_ LPCWSTR Str, _In_ LPCWST
         {
             if (*(CurrentResult++) == TranslatedHr)
             {
-                return DUPL_RETURN_ERROR_EXPECTED;
+                return;
             }
         }
     }
 
-    // Error was not expected so display the message box
-    DisplayMsg(Str, Title, TranslatedHr);
+    Exception exception;
+    exception.m_msg = Str;
+    exception.m_file = file;
+    exception.m_line = line;
+    exception.m_result = TranslatedHr;
+    throw exception;
+    return; //never run;
+}
 
-    return DUPL_RETURN_ERROR_UNEXPECTED;
+bool DesktopDuplication::getFactory(ComPtr<IDXGIFactory1> &pFactory)
+{
+    HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&pFactory));
+    if (FAILED(hr))
+    {
+        ProcessFailure(__FILE__, __LINE__, nullptr, L"Failed to get DXGI Factory", L"Error", hr, SystemTransitionsExpectedErrors);
+        return false;
+    }
+    return true;
+}
+
+bool DesktopDuplication::getAdapter(ComPtr<IDXGIFactory1> &pFactory,
+                                    ComPtr<IDXGIAdapter> &pAdapter, UINT output)
+{
+    UINT adapterIndex = m_outputMap.at(output);
+    HRESULT hr = pFactory->EnumAdapters(adapterIndex, &pAdapter);
+    if (FAILED(hr))
+    {
+        if(hr == DXGI_ERROR_NOT_FOUND)
+        {
+            return false;
+        }
+        ProcessFailure(__FILE__, __LINE__, nullptr, L"Failed to get DXGI Factory", L"Error", hr, SystemTransitionsExpectedErrors);
+        return false;
+    }
+    return true;
+}
+
+bool DesktopDuplication::getOutput(ComPtr<IDXGIAdapter> &pAdapter,
+                                   ComPtr<IDXGIOutput1> &pOutput, UINT output)
+{
+    UINT outputIndex = output - m_outputMap.indexOf(m_outputMap.at(output)); //Little tricky, not clear enough.
+    ComPtr<IDXGIOutput> pOut;
+    HRESULT hr = pAdapter->EnumOutputs(outputIndex, &pOut);
+    if (FAILED(hr))
+    {
+        ProcessFailure(__FILE__, __LINE__, nullptr, L"Output specified to be duplicated does not exist", L"Error", hr);
+        return false;
+    }
+    hr = pOut.As(&pOutput);
+    if (FAILED(hr))
+    {
+        ProcessFailure(__FILE__, __LINE__, nullptr, L"Failed to QI for DxgiOutput1 in DUPLICATIONMANAGER", L"Error", hr);
+        return false;
+    }
+    return true;
+}
+
+bool DesktopDuplication::getD3DSets(ComPtr<IDXGIAdapter> &pAdapter, ComPtr<ID3D11Device> &pDevice, ComPtr<ID3D11DeviceContext> &pContext)
+{
+    D3D_FEATURE_LEVEL FeatureLevels[] = {
+        D3D_FEATURE_LEVEL_12_1,
+        D3D_FEATURE_LEVEL_12_0,
+        D3D_FEATURE_LEVEL_11_1,
+        D3D_FEATURE_LEVEL_11_0,
+        D3D_FEATURE_LEVEL_10_1,
+        D3D_FEATURE_LEVEL_10_0,
+        D3D_FEATURE_LEVEL_9_1};
+    HRESULT hr = D3D11CreateDevice(
+                pAdapter.Get(),
+                D3D_DRIVER_TYPE_UNKNOWN,
+                nullptr,
+                /*D3D11_CREATE_DEVICE_DEBUG*/0,
+                FeatureLevels,
+                ARRAYSIZE(FeatureLevels),
+                D3D11_SDK_VERSION,
+                &pDevice,
+                nullptr,
+                &pContext);
+    if (FAILED(hr))
+    {
+        ProcessFailure(__FILE__, __LINE__, pDevice.Get(), L"Device creation failed", L"Error", hr, SystemTransitionsExpectedErrors);
+        return false;
+    }
+    return true;
+}
+
+bool DesktopDuplication::getDuplication(ComPtr<IDXGIOutput1> &pOutput, ComPtr<ID3D11Device> &pDevice, ComPtr<IDXGIOutputDuplication> &pDuplication)
+{
+    HRESULT hr = pOutput->DuplicateOutput(pDevice.Get(), &pDuplication);
+    if (FAILED(hr))
+    {
+        if (hr == DXGI_ERROR_NOT_CURRENTLY_AVAILABLE)
+        {
+            ProcessFailure(__FILE__, __LINE__, pDevice.Get(), L"There is already the maximum number of applications using the Desktop Duplication API running, please close one of those applications and then try again.", L"Error", hr, CreateDuplicationExpectedErrors);
+            return false;
+        }
+        ProcessFailure(__FILE__, __LINE__, pDevice.Get(), L"Failed to get duplicate output", L"Error", hr, CreateDuplicationExpectedErrors);
+        return false;
+    }
+    return true;
+}
+
+bool DesktopDuplication::getStaging(ComPtr<IDXGIOutput1> &pOutput, ComPtr<ID3D11Device> &pDevice, ComPtr<ID3D11Texture2D> &pStaging, DXGI_OUTPUT_DESC &outputDesc)
+{
+    RtlZeroMemory(&outputDesc, sizeof(outputDesc));
+    pOutput->GetDesc(&outputDesc);
+
+    D3D11_TEXTURE2D_DESC stagingDescriptor;
+    ZeroMemory(&stagingDescriptor, sizeof(stagingDescriptor));
+    stagingDescriptor.Width = outputDesc.DesktopCoordinates.right - outputDesc.DesktopCoordinates.left;
+    stagingDescriptor.Height = outputDesc.DesktopCoordinates.bottom - outputDesc.DesktopCoordinates.top;
+    stagingDescriptor.Usage = D3D11_USAGE_STAGING;
+    stagingDescriptor.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    stagingDescriptor.BindFlags = 0;
+    stagingDescriptor.MiscFlags = 0;
+    stagingDescriptor.MipLevels = 1;
+    stagingDescriptor.ArraySize = 1;
+    stagingDescriptor.SampleDesc.Count = 1;
+    stagingDescriptor.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+
+    HRESULT hr = pDevice->CreateTexture2D(&stagingDescriptor, NULL, &pStaging);
+    if (FAILED(hr))
+    {
+        ProcessFailure(__FILE__, __LINE__, pDevice.Get(), L"Failed to create staging texture", L"Error", hr, SystemTransitionsExpectedErrors);
+        return false;
+    }
+    return true;
+}
+
+bool DesktopDuplication::tryCapture(ComPtr<ID3D11Device> &pDevice, ComPtr<ID3D11DeviceContext> &pContext, ComPtr<ID3D11Texture2D> &pStaging, ComPtr<ID3D11Texture2D> &pTemp, ComPtr<IDXGIOutputDuplication> &pDuplication, DXGI_OUTPUT_DESC &outputDesc, MetaData &data, D3D11_MAPPED_SUBRESOURCE& mapInfo)
+{
+    if(!releaseFrame(pDuplication))
+        return false;
+
+    pContext->Unmap(pStaging.Get(), 0);
+
+    DXGI_OUTDUPL_FRAME_INFO info;
+    ComPtr<ID3D11Texture2D> pFrame;
+    if(!getFrame(pDuplication, info, pFrame))
+        return false;
+
+    if(!getMetaData(info.TotalMetadataBufferSize, data))
+        return false;
+
+    if(!getChanges(pDuplication, data))
+        return false;
+
+    if(!copyMove(pContext, pDevice, pStaging, pTemp, data, outputDesc))
+        return false;
+
+    if(!copyDirty(pContext, data, pStaging, pFrame))
+        return false;
+
+    if(!getMapInfo(pContext, pStaging, mapInfo))
+        return false;
+
+    return true;
+}
+
+bool DesktopDuplication::releaseFrame(ComPtr<IDXGIOutputDuplication> &pDuplication)
+{
+    HRESULT hr = pDuplication->ReleaseFrame();
+    if (FAILED(hr) && hr != DXGI_ERROR_INVALID_CALL)
+    {
+        ProcessFailure(__FILE__, __LINE__, nullptr, L"Failed to release frame in DUPLICATIONMANAGER", L"Error", hr, FrameInfoExpectedErrors);
+        return false;
+    }
+    return true;
+}
+
+bool DesktopDuplication::getFrame(ComPtr<IDXGIOutputDuplication> &pDuplication, DXGI_OUTDUPL_FRAME_INFO &info, ComPtr<ID3D11Texture2D> &pFrame)
+{
+    HRESULT hr;
+    ComPtr<IDXGIResource> resource;
+    forever
+    {
+        hr = pDuplication->AcquireNextFrame(500, &info, &resource);
+        if(hr==DXGI_ERROR_WAIT_TIMEOUT || info.TotalMetadataBufferSize==0)
+        {
+            //qDebug()<<"NextFrame retry:"<<info.TotalMetadataBufferSize<<":"<<(void*)hr;
+            releaseFrame(pDuplication);
+            //auto r = pDuplication->ReleaseFrame();
+            //qDebug()<<"release result:"<< (void*)r;
+            continue;
+        }
+        if (FAILED(hr))
+        {
+            ProcessFailure(__FILE__, __LINE__, nullptr, L"Failed to acquire next frame in DUPLICATIONMANAGER", L"Error", hr, FrameInfoExpectedErrors);
+            return false;
+        }
+        break;
+    }
+//qDebug()<<"Got";
+    hr = resource.As(&pFrame);
+    if (FAILED(hr))
+    {
+        ProcessFailure(__FILE__, __LINE__, nullptr, L"Failed to QI for ID3D11Texture2D from acquired IDXGIResource in DUPLICATIONMANAGER", L"Error", hr);
+        return false;
+    }
+    return true;
+}
+
+bool DesktopDuplication::getMetaData(unsigned int size, MetaData &data)
+{
+    if (size > data.size)
+    {
+        if (data.data)
+        {
+            delete [] data.data;
+            data.data = nullptr;
+        }
+        data.data = new (std::nothrow) BYTE[size];
+        if (!data.data)
+        {
+            RtlZeroMemory(&data, sizeof(data));
+            ProcessFailure(__FILE__, __LINE__, nullptr, L"Failed to allocate memory for metadata in DUPLICATIONMANAGER", L"Error", E_OUTOFMEMORY);
+            return false;
+        }
+        data.size = size;
+    }
+
+    return true;
+}
+
+bool DesktopDuplication::getChanges(ComPtr<IDXGIOutputDuplication> &pDuplication, MetaData &data)
+{
+    UINT BufSize = data.size;
+
+    // Get move rectangles
+    data.pMove = (DXGI_OUTDUPL_MOVE_RECT*)data.data;
+    HRESULT hr = pDuplication->GetFrameMoveRects(BufSize, data.pMove, &BufSize);
+    if (FAILED(hr))
+    {
+        data.dirtyCount = 0;
+        data.moveCount = 0;
+        ProcessFailure(__FILE__, __LINE__, nullptr, L"Failed to get frame move rects in DUPLICATIONMANAGER", L"Error", hr, FrameInfoExpectedErrors);
+        return false;
+    }
+    data.moveCount = BufSize / sizeof(DXGI_OUTDUPL_MOVE_RECT);
+
+    data.pDirty = (RECT*)(data.data + BufSize);
+    BufSize = data.size - BufSize;
+
+    // Get dirty rectangles
+    hr = pDuplication->GetFrameDirtyRects(BufSize, data.pDirty, &BufSize);
+    if (FAILED(hr))
+    {
+        data.dirtyCount = 0;
+        data.moveCount = 0;
+        ProcessFailure(__FILE__, __LINE__, nullptr, L"Failed to get frame dirty rects in DUPLICATIONMANAGER", L"Error", hr, FrameInfoExpectedErrors);
+        return false;
+    }
+    data.dirtyCount = BufSize / sizeof(RECT);
+
+    return true;
+}
+
+bool DesktopDuplication::copyMove(ComPtr<ID3D11DeviceContext> &pContext, ComPtr<ID3D11Device> &pDevice, ComPtr<ID3D11Texture2D> &pStaging, ComPtr<ID3D11Texture2D> &pTemp, MetaData &data, DXGI_OUTPUT_DESC &outputDesc)
+{
+    if(!data.moveCount)
+        return true;
+
+    D3D11_TEXTURE2D_DESC stagingDesc;
+    pStaging->GetDesc(&stagingDesc);
+
+    // Make new intermediate surface to copy into for moving
+    if (!pTemp)
+    {
+        D3D11_TEXTURE2D_DESC tempDesc;
+        tempDesc = stagingDesc;
+        tempDesc.Width = outputDesc.DesktopCoordinates.right - outputDesc.DesktopCoordinates.left;
+        tempDesc.Height = outputDesc.DesktopCoordinates.bottom - outputDesc.DesktopCoordinates.top;
+        tempDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
+        tempDesc.MiscFlags = 0;
+        HRESULT hr = pDevice->CreateTexture2D(&tempDesc, nullptr, &pTemp);
+        if (FAILED(hr))
+        {
+            ProcessFailure(__FILE__, __LINE__, pDevice.Get(), L"Failed to create staging texture for move rects", L"Error", hr, SystemTransitionsExpectedErrors);
+            return false;
+        }
+    }
+
+    for (UINT i = 0; i < data.moveCount; ++i)
+    {
+        // Copy rect out of shared surface
+        D3D11_BOX Box;
+        Box.left = data.pMove[i].SourcePoint.x;
+        Box.top = data.pMove[i].SourcePoint.y;
+        Box.front = 0;
+        Box.right = Box.left + data.pMove[i].DestinationRect.right - data.pMove[i].DestinationRect.left;
+        Box.bottom = Box.top + data.pMove[i].DestinationRect.bottom - data.pMove[i].DestinationRect.top;
+        Box.back = 1;
+        pContext->CopySubresourceRegion(pTemp.Get(), 0, 0, 0, 0, pStaging.Get(), 0, &Box);
+
+        // Copy back to shared surface
+        Box.left = 0;
+        Box.top = 0;
+        Box.front = 0;
+        Box.right = data.pMove[i].DestinationRect.right - data.pMove[i].DestinationRect.left;
+        Box.bottom = data.pMove[i].DestinationRect.bottom - data.pMove[i].DestinationRect.top;
+        Box.back = 1;
+        pContext->CopySubresourceRegion(pStaging.Get(), 0,
+                                               data.pMove[i].DestinationRect.left,
+                                               data.pMove[i].DestinationRect.top,
+                                               0, pTemp.Get(), 0, &Box);
+    }
+    return true;
+}
+
+bool DesktopDuplication::copyDirty(ComPtr<ID3D11DeviceContext> &pContext, MetaData &data, ComPtr<ID3D11Texture2D> &pStaging, ComPtr<ID3D11Texture2D> &pFrame)
+{
+    if(!data.dirtyCount)
+        return true;
+
+    for (UINT i = 0; i < data.dirtyCount; ++i)
+    {
+        // Copy rect out of shared surface
+        D3D11_BOX Box;
+        Box.left = data.pDirty[i].left;
+        Box.top = data.pDirty[i].top;
+        Box.front = 0;
+        Box.right = data.pDirty[i].right;
+        Box.bottom = data.pDirty[i].bottom;
+        Box.back = 1;
+        pContext->CopySubresourceRegion(pStaging.Get(), 0, Box.left, Box.top, 0, pFrame.Get(), 0, &Box);
+    }
+    return true;
+}
+
+bool DesktopDuplication::getMapInfo(ComPtr<ID3D11DeviceContext> &pContext, ComPtr<ID3D11Texture2D> &pStaging, D3D11_MAPPED_SUBRESOURCE &mapInfo)
+{
+    HRESULT hr = pContext->Map(
+                pStaging.Get(),
+                0,  // Subresource
+                D3D11_MAP_READ,
+                0,  // MapFlags
+                &mapInfo);
+    if (FAILED(hr))
+    {
+        ProcessFailure(__FILE__, __LINE__, nullptr, L"Failed to map surface for pointer", L"Error", hr, SystemTransitionsExpectedErrors);
+        return false;
+    }
+    return true;
 }
 
 DesktopDuplication::DesktopDuplication(QObject *parent) :
-    QObject(parent),
-    m_initialized(false)
+    QObject(parent)
 {
-    initialize();
+    ZeroMemory(&m_outputDesc, sizeof(m_outputDesc));
+    ZeroMemory(&m_mapInfo, sizeof(m_mapInfo));
+    ZeroMemory(&m_data, sizeof(m_data));
+    m_running = false;
 }
 
-void DesktopDuplication::initialize()
+int DesktopDuplication::getOutputCount()
 {
-    if(m_initialized)
-        reset();
-
-    DUPL_RETURN dr = prepareOutputMap();
-    //
-    //Create a DXGI Factory first.
-    //
-    ComPtr<IDXGIFactory1> pFactory;
-    HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&pFactory));
-    if(SUCCEEDED(hr))
-    {
-        //
-        //Enumeration adapters installed in this machine.
-        //
-        ComPtr<IDXGIAdapter> pAdapter;
-        for(int i=0; pFactory->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND; i++)
-        {
-            ComPtr<IDXGIOutput> pOutput;
-            for(int i=0; pAdapter->EnumOutputs(i, &pOutput) != DXGI_ERROR_NOT_FOUND; i++)
-            {
-                ComPtr<IDXGIOutput1> pOutput1;
-                hr = pOutput.As(&pOutput1);
-                if(SUCCEEDED(hr))
-                {
-                    m_outputs.push_back(pOutput1);
-                }
-            }
-        }
-    }
-    qDebug()<<"Outputs:"<<m_outputs.size();
-    if(FAILED(hr))
-    {
-        qCritical()<<"Init error:"<<(void*)hr;
-        return;
-    }
-    if(m_outputs.isEmpty())
-    {
-        qCritical()<<"No output found";
-        return;
-    }
-    m_initialized = true;
-}
-
-void DesktopDuplication::reset()
-{
-    m_initialized = false;
-    m_outputMap.clear();
-    ///old part
-    m_outputs.clear();
-    m_outputID = -1;
-    m_device.Reset();
-    m_context.Reset();
-    m_duplication.Reset();
-    m_stagingTexture.Reset();
-}
-
-DUPL_RETURN DesktopDuplication::begin()
-{
-    DUPL_RETURN result = DUPL_RETURN_SUCCESS;
     if(m_outputMap.isEmpty())
+        prepareOutputMap();
+    return m_outputMap.size();
+}
+
+bool DesktopDuplication::begin(unsigned int output,
+                               ComPtr<ID3D11Device> &pDevice,
+                               ComPtr<ID3D11DeviceContext> &pContext,
+                               ComPtr<ID3D11Texture2D> &pStaging,
+                               ComPtr<IDXGIOutputDuplication> &pDuplication,
+                               DXGI_OUTPUT_DESC &outputDesc)
+{
+    if(output >= m_outputMap.size())
     {
-        result = prepareOutputMap();
+        if(!prepareOutputMap())
+            return false;
     }
-    return result;
+
+    if(output >= m_outputMap.size())
+    {
+        ProcessFailure(__FILE__, __LINE__, nullptr, L"Output not found.", L"Error", DXGI_ERROR_NOT_FOUND);
+        return false;
+    }
+
+    ComPtr<IDXGIFactory1> pFactory;
+    if(!getFactory(pFactory))
+        return false;
+
+    ComPtr<IDXGIAdapter> pAdapter;
+    if(!getAdapter(pFactory, pAdapter, output))
+        return false;
+
+    ComPtr<IDXGIOutput1> pOutput;
+    if(!getOutput(pAdapter, pOutput, output))
+        return false;
+
+    if(!getD3DSets(pAdapter, pDevice, pContext))
+        return false;
+
+    if(!getDuplication(pOutput, pDevice, pDuplication))
+        return false;
+
+    if(!getStaging(pOutput, pDevice, pStaging, outputDesc))
+        return false;
+
+    return true;
+}
+
+void DesktopDuplication::end(ComPtr<ID3D11Device> &pDevice, ComPtr<ID3D11DeviceContext> &pContext, ComPtr<ID3D11Texture2D> &pStaging, ComPtr<ID3D11Texture2D> &pTemp, ComPtr<IDXGIOutputDuplication> &pDuplication, DXGI_OUTPUT_DESC &outputDesc, D3D11_MAPPED_SUBRESOURCE &mapInfo, MetaData &data)
+{
+    releaseFrame(pDuplication);
+    pContext->Unmap(pStaging.Get(), 0);
+    if (data.data)
+    {
+        delete [] data.data;
+        data.data = nullptr;
+    }
+    RtlZeroMemory(&outputDesc, sizeof(outputDesc));
+    RtlZeroMemory(&mapInfo, sizeof(mapInfo));
+    RtlZeroMemory(&data, sizeof(data));
+    pDevice.Reset();
+    pContext.Reset();
+    pStaging.Reset();
+    pTemp.Reset();
+    pDuplication.Reset();
 }
 
 bool DesktopDuplication::prepareOutputMap()
 {
     m_outputMap.clear();
 
-    ComPtr<IDXGIFactory> pFactory;
-    HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(pFactory.GetAddressOf()));
-    if (FAILED(hr))
-    {
-        return ProcessFailure(nullptr, L"Failed to get DXGI Factory", L"Error", hr, SystemTransitionsExpectedErrors);
-    }
+    ComPtr<IDXGIFactory1> pFactory;
+    if(!getFactory(pFactory))
+        return false;
+
+    HRESULT hr = S_OK;
 
     for(int adapterCount = 0; SUCCEEDED(hr); ++adapterCount)
     {
         ComPtr<IDXGIAdapter> pAdapter;
         hr = pFactory->EnumAdapters(adapterCount, &pAdapter);
-        if(pAdapter.Get() && (hr != DXGI_ERROR_NOT_FOUND))
+        if(pAdapter && (hr != DXGI_ERROR_NOT_FOUND))
         {
             HRESULT ho = S_OK;
             for(int outputCount = 0; SUCCEEDED(ho); ++outputCount)
             {
                 ComPtr<IDXGIOutput> pOutput;
                 ho = pAdapter->EnumOutputs(outputCount, &pOutput);
-                if(pOutput.Get() && (ho != DXGI_ERROR_NOT_FOUND))
+                if(pOutput && (ho != DXGI_ERROR_NOT_FOUND))
                 {
                     m_outputMap.append(adapterCount);
                 }
@@ -228,181 +543,100 @@ bool DesktopDuplication::prepareOutputMap()
 
     if(m_outputMap.isEmpty())
     {
-        return DUPL_RETURN_ERROR_EXPECTED;
-    }
-
-    return DUPL_RETURN_SUCCESS;
-}
-
-DUPL_RETURN DesktopDuplication::trySanpshot(unsigned int output)
-{
-    if(output >= m_outputMap.size())
-    {
-        prepareOutputMap();
-    }
-
-    if(m_outputMap.isEmpty())
-    {
-        return DUPL_RETURN_ERROR_EXPECTED;
-    }
-
-    if(output >= m_outputMap.size())
-        throw std::out_of_range(L"Output not available!");
-    return DUPL_RETURN_SUCCESS;
-}
-
-bool DesktopDuplication::setOutputID(int id)
-{
-    if(!m_initialized)
-        initialize();
-
-    if(id<0 || id>=m_outputs.size())
-    {
-        qCritical()<<"Output id error:"<<id<<" of "<<m_outputs.size();
         return false;
     }
 
-    HRESULT hr;
-
-    auto output = m_outputs.at(id);
-    ComPtr<IDXGIAdapter> pAdapter;
-
-    hr = output->GetParent(IID_PPV_ARGS(&pAdapter));
-    if(SUCCEEDED(hr))
-    {
-        m_device.Reset();
-        m_context.Reset();
-        D3D_FEATURE_LEVEL FeatureLevels[] = {
-            D3D_FEATURE_LEVEL_12_1,
-            D3D_FEATURE_LEVEL_12_0,
-            D3D_FEATURE_LEVEL_11_1,
-            D3D_FEATURE_LEVEL_11_0,
-            D3D_FEATURE_LEVEL_10_1,
-            D3D_FEATURE_LEVEL_10_0};
-        hr = D3D11CreateDevice(
-                    pAdapter.Get(),             //pAdapter [in, optional]
-                    D3D_DRIVER_TYPE_UNKNOWN,    //DriverType
-                    nullptr,                    //Software
-                    /*D3D11_CREATE_DEVICE_DEBUG*/0,  //Flags
-                    FeatureLevels,              //pFeatureLevels
-                    ARRAYSIZE(FeatureLevels),   //FeatureLevels
-                    D3D11_SDK_VERSION,          //SDKVersion
-                    &m_device,           //ppDevice
-                    nullptr,                    //pFeatureLevel
-                    &m_context);         //context
-        if(SUCCEEDED(hr))
-        {
-            m_duplication.Reset();
-            hr = output->DuplicateOutput(m_device.Get(), &m_duplication);
-            if(SUCCEEDED(hr))
-            {
-                DXGI_OUTPUT_DESC outputDesc;
-                hr = output->GetDesc(&outputDesc);
-                if(SUCCEEDED(hr))
-                {
-                    D3D11_TEXTURE2D_DESC stagingDescriptor;
-                    ZeroMemory(&stagingDescriptor, sizeof(stagingDescriptor));
-                    stagingDescriptor.Width = outputDesc.DesktopCoordinates.right - outputDesc.DesktopCoordinates.left;
-                    stagingDescriptor.Height = outputDesc.DesktopCoordinates.bottom - outputDesc.DesktopCoordinates.top;
-                    stagingDescriptor.Usage = D3D11_USAGE_STAGING;
-                    stagingDescriptor.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-                    stagingDescriptor.BindFlags = 0;
-                    stagingDescriptor.MiscFlags = 0;
-                    stagingDescriptor.MipLevels = 1;
-                    stagingDescriptor.ArraySize = 1;
-                    stagingDescriptor.SampleDesc.Count = 1;
-                    stagingDescriptor.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-
-                    m_stagingTexture.Reset();
-                    hr = m_device->CreateTexture2D(&stagingDescriptor, NULL, &m_stagingTexture);
-                    if(SUCCEEDED(hr))
-                    {
-                        m_snapshot = QImage(stagingDescriptor.Width, stagingDescriptor.Height, QImage::Format_ARGB32);
-                    }
-                }
-            }
-        }
-    }
-    return SUCCEEDED(hr);
+    return true;
 }
 
-QImage DesktopDuplication::takeSnapshot()
+bool DesktopDuplication::trySanpshot(unsigned int output, QImage &snapShot)
 {
-    DXGI_OUTDUPL_FRAME_INFO info;
-    ComPtr<IDXGIResource> resource;
-    HRESULT hr = m_duplication->AcquireNextFrame(
-                3000,                       //TimeoutInMilliseconds
-                &info,                      //pFrameInfo
-                &resource);                 //ppDesktopResource
-    if(SUCCEEDED(hr))
+    ComPtr<ID3D11Device> pDevice;
+    ComPtr<ID3D11DeviceContext> pContext;
+    ComPtr<ID3D11Texture2D> pStaging;
+    ComPtr<ID3D11Texture2D> pTemp;
+    ComPtr<IDXGIOutputDuplication> pDuplication;
+    DXGI_OUTPUT_DESC outputDesc;
+    D3D11_MAPPED_SUBRESOURCE mapInfo;
+    MetaData data;
+    RtlZeroMemory(&outputDesc, sizeof(outputDesc));
+    RtlZeroMemory(&mapInfo, sizeof(mapInfo));
+    RtlZeroMemory(&data, sizeof(data));
+
+
+    if(!begin(output, pDevice, pContext, pStaging, pDuplication, outputDesc))
+        return false;
+
+    if(!tryCapture(pDevice, pContext, pStaging, pTemp, pDuplication, outputDesc, data, mapInfo))
+        return false;
+
+    auto height = outputDesc.DesktopCoordinates.bottom - outputDesc.DesktopCoordinates.top;
+    auto width = outputDesc.DesktopCoordinates.right - outputDesc.DesktopCoordinates.left;
+    QImage img(width, height, QImage::Format_ARGB32);
+    for(int i=0; i<height; i++)
     {
-        //qDebug()<<info.AccumulatedFrames;
-        ComPtr<ID3D11Texture2D> frameTexture;
-        hr = resource.As(&frameTexture);
-        if(SUCCEEDED(hr))
-        {
-            m_context->CopyResource(m_stagingTexture.Get(), frameTexture.Get());
-
-            D3D11_MAPPED_SUBRESOURCE mapInfo;
-            hr = m_context->Map(
-                        m_stagingTexture.Get(),
-                        0,  // Subresource
-                        D3D11_MAP_READ,
-                        0,  // MapFlags
-                        &mapInfo);
-            if(SUCCEEDED(hr))
-            {
-                //qDebug()<<"Texture mapped.";
-                for(int i=0; i<m_snapshot.height(); i++)
-                {
-                    memcpy(
-                        (void*)((char*)m_snapshot.bits()+i*m_snapshot.width()*4),
-                        (void*)((char*)mapInfo.pData+i*mapInfo.RowPitch),
-                        m_snapshot.width()*4
-                          );
-                }
-            }
-            m_context->Unmap(m_stagingTexture.Get(), 0);
-        }
-        hr = m_duplication->ReleaseFrame();
+        memcpy(
+            (void*)((char*)img.bits()+i*img.width()*4),
+            (void*)((char*)mapInfo.pData+i*mapInfo.RowPitch),
+            img.width()*4);
     }
-    else
-        qDebug()<<(void*)hr;
+    snapShot = img;
 
-//qDebug()<<(void*)hr;
-    return m_snapshot;
+    end(pDevice, pContext, pStaging, pTemp, pDuplication, outputDesc, mapInfo, data);
+
+    return true;
 }
 
-bool DesktopDuplication::takeSnapshot(unsigned int output, SnapshotInfo *info)
+QImage DesktopDuplication::takeSnapshot(unsigned int output)
 {
-    DUPL_RETURN ret = DUPL_RETURN_SUCCESS;
-    info->buffer = nullptr;
+    QImage snapShot;
     forever
     {
-        ret = trySnapshot(output);
-        if(ret == DUPL_RETURN_ERROR_EXPECTED)
+        if(!trySanpshot(output, snapShot))
         {
             m_wait.Wait();
+            //qDebug()<<"Retry";
             continue;
         }
-//        if(output >= m_outputMap.size())
-//        {
-//            ret = prepareOutputMap();
-//        }
-//        if(ret != DUPL_RETURN_SUCCESS)
-//        {
-//            if(ret == DUPL_RETURN_ERROR_EXPECTED)
-//            {
-//                m_wait.Wait();
-//                continue;
-//            }
-//            else
-//            {
-//                DisplayMsg("Wrong output index, out of boudn", "Wrong arg", DXGI_ERROR_NOT_FOUND);
-//                return QImage();
-//            }
-//        }
-        //Reduce content, just test return once
+        break;
     }
-    return QImage();//temp
+    return snapShot;
+}
+
+bool DesktopDuplication::beginCapture(unsigned int output)
+{
+    if(m_running)
+        end(m_pDevice, m_pContext, m_pStaging, m_pTemp, m_pDuplication, m_outputDesc, m_mapInfo, m_data);
+
+    m_running = false;
+
+    if(!begin(output, m_pDevice, m_pContext, m_pStaging, m_pDuplication, m_outputDesc))
+        return false;
+
+    m_running = true;
+    return true;
+}
+
+bool DesktopDuplication::endCapture()
+{
+    if(!m_running)
+        return true;
+    end(m_pDevice, m_pContext, m_pStaging, m_pTemp, m_pDuplication, m_outputDesc, m_mapInfo, m_data);
+    m_running = false;
+    return true;
+}
+
+bool DesktopDuplication::capture(SnapshotInfo &info)
+{
+    if(!m_running)
+        return false;
+
+    if(!tryCapture(m_pDevice, m_pContext, m_pStaging, m_pTemp, m_pDuplication, m_outputDesc, m_data, m_mapInfo))
+        return false;
+
+    info.height = m_outputDesc.DesktopCoordinates.bottom - m_outputDesc.DesktopCoordinates.top;
+    info.width = m_outputDesc.DesktopCoordinates.right - m_outputDesc.DesktopCoordinates.left;
+    info.buffer = (QRgb*)m_mapInfo.pData;
+    info.pitch = m_mapInfo.RowPitch;
+    return true;
 }

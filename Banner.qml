@@ -19,9 +19,10 @@ ToolBar {
         anchors.fill: parent
 
         StateButton {
+            id: capture
             radius: 35
             source: "qrc:/img/photo-camera.svg"
-            enabled: machine.Ready || machine.NoSnap
+            enabled: true
             name: "SnapShot"
 
             onClicked: {
@@ -29,12 +30,25 @@ ToolBar {
                 window.visibility = ApplicationWindow.Minimized
                 engine.capture()
             }
+
+            states: [
+                State {
+                    name: "ENABLED"
+                    when: machine.NoSnap
+                    PropertyChanges { target: capture; opacity: 0.8 }
+                }
+            ]
+
+            transitions: Transition {
+                from: ""; to: "ENABLED"; reversible: true
+                NumberAnimation { properties: "opacity"; duration: 100}
+            }
         }
 
         VSeparator {}
 
         MousePositionSelector {
-            enabled: machine.Ready || machine.GetMousePosition
+            enabled: machine.Ready
             name: "MousePosition"
         }
 
@@ -49,7 +63,7 @@ ToolBar {
             spotWidth: contractSpot.spotWidth
             spotHeight: contractSpot.spotHeight
             colorName: contractSpot.colorName
-            enabled: machine.Ready || (machine.HotSpotScan && hotSpot.name == name)
+            enabled: machine.Ready
         }
 
         VSeparator {}
@@ -85,6 +99,7 @@ ToolBar {
         DataDelegate {
             titleIcon: "qrc:/img/dollar.png"
             titleText: "点位"
+            name: "Position"
             enabled: machine.Ready
         }
 

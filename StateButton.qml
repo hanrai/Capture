@@ -24,7 +24,7 @@ RoundButton {
     states: [
         State {
             name: "ENABLED"
-            when: button.enabled
+            when: machine.Ready
             PropertyChanges { target: button; opacity: 0.8 }
         }
     ]
@@ -37,5 +37,6 @@ RoundButton {
     onClicked: {
         machine.submitEvent("Button.Clicked",
                                  {"name": name})
+        console.log(engine.actionName);
     }
 }

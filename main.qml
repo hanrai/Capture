@@ -103,7 +103,8 @@ ApplicationWindow {
             id: workspace
             source: engine.snapshotLoaded ?
                         "image://snapshot/"+engine.snapshot : ""
-            onSourceChanged: {window.visibility = lastVisibility}
+            onSourceChanged: {window.visibility = lastVisibility;
+                machine.submitEvent("SnapshotChanged")}
             MousePositionIndicator {}
             HotSpotIndicator {}
             SingleColorIndicator{obj: contractSpot; source: "qrc:/img/tag.png"}

@@ -26,38 +26,44 @@ typedef _Return_type_success_(return == DUPL_RETURN_SUCCESS) enum
 }DUPL_RETURN;
 
 _Post_satisfies_(return != DUPL_RETURN_SUCCESS)
-bool ProcessFailure(_In_opt_ ID3D11Device* Device, _In_ LPCWSTR Str, _In_ LPCWSTR Title, HRESULT hr, _In_opt_z_ HRESULT* ExpectedErrors = nullptr);
 
 void DisplayMsg(_In_ LPCWSTR Str, _In_ LPCWSTR Title, HRESULT hr);
 
-struct _snapshotInfo
+struct SnapshotInfo
 {
     QRgb* buffer;
-    int width;
-    int height;
-} SnapshotInfo;
+    unsigned int width;
+    unsigned int height;
+    unsigned int pitch;
+};
+
+struct MetaData
+{
+    unsigned int size;
+    unsigned int moveCount;
+    unsigned int dirtyCount;
+    BYTE *data;
+    DXGI_OUTDUPL_MOVE_RECT *pMove;
+    RECT *pDirty;
+};
 
 class DesktopDuplication : public QObject
 {
     Q_OBJECT
 public:
     explicit DesktopDuplication(QObject *parent = nullptr);
-    int getOutputCount() {return m_outputs.size();}
-    int getOutputID() {return m_outputID;}
-    bool setOutputID(int id);
-    QImage takeSnapshot();
-    bool takeSnapshot(unsigned int output, SnapshotInfo *info);
+    int getOutputCount();
+    QImage takeSnapshot(unsigned int output);
+    bool beginCapture(unsigned int output);
+    bool endCapture();
+    bool capture(SnapshotInfo &info);
 
 public:
-    class DuplicationException
+    class Exception
     {
     public:
-        DuplicationException(HRESULT rh, wchar_t *msg, wchar_t *file, int line):
-            m_msg(msg), m_file(file), m_line(line), m_result(rh)
-        {;}
-    public:
-        wchar_t *m_msg;
-        wchar_t *m_file;
+        LPCWSTR m_msg;
+        const char *m_file;
         int m_line;
         HRESULT m_result;
     };
@@ -66,22 +72,63 @@ signals:
 
 public slots:
 private:
-    void initialize();
-    void reset();
-    DUPL_RETURN begin();
+    bool trySanpshot(unsigned int output, QImage &snapShot);
     bool prepareOutputMap();
-    DUPL_RETURN trySanpshot(unsigned int output);
+    bool begin(unsigned int output,
+               ComPtr<ID3D11Device> &pDevice,
+               ComPtr<ID3D11DeviceContext> &pContext,
+               ComPtr<ID3D11Texture2D> &pStaging,
+               ComPtr<IDXGIOutputDuplication> &pDuplication,
+               DXGI_OUTPUT_DESC &outputDesc);
+    bool tryCapture(ComPtr<ID3D11Device> &pDevice, ComPtr<ID3D11DeviceContext> &pContext,
+                    ComPtr<ID3D11Texture2D> &pStaging, ComPtr<ID3D11Texture2D> &pTemp,
+                    ComPtr<IDXGIOutputDuplication> &pDuplication, DXGI_OUTPUT_DESC &outputDesc,
+                    MetaData &data, D3D11_MAPPED_SUBRESOURCE& mapInfo);
+    void end(ComPtr<ID3D11Device> &pDevice,
+             ComPtr<ID3D11DeviceContext> &pContext,
+             ComPtr<ID3D11Texture2D> &pStaging,
+             ComPtr<ID3D11Texture2D> &pTemp,
+             ComPtr<IDXGIOutputDuplication> &pDuplication,
+             DXGI_OUTPUT_DESC &outputDesc,
+             D3D11_MAPPED_SUBRESOURCE &mapInfo,
+             MetaData &data);
+
+    void ProcessFailure(const char *file, int line, _In_opt_ ID3D11Device* Device, _In_ LPCWSTR Str,
+                        _In_ LPCWSTR Title, HRESULT hr, _In_opt_z_ HRESULT* ExpectedErrors = nullptr);
+
+    bool getFactory(ComPtr<IDXGIFactory1> &pFactory);
+    bool getAdapter(ComPtr<IDXGIFactory1> &pFactory, ComPtr<IDXGIAdapter> &pAdapter, UINT output);
+    bool getOutput(ComPtr<IDXGIAdapter> &pAdapter, ComPtr<IDXGIOutput1> &pOutput, UINT output);
+    bool getD3DSets(ComPtr<IDXGIAdapter> &pAdapter, ComPtr<ID3D11Device> &pDevice,
+                    ComPtr<ID3D11DeviceContext> &pContext);
+    bool getDuplication(ComPtr<IDXGIOutput1> &pOutput, ComPtr<ID3D11Device> &pDevice,
+                        ComPtr<IDXGIOutputDuplication> &pDuplication);
+    bool getStaging(ComPtr<IDXGIOutput1> &pOutput, ComPtr<ID3D11Device> &pDevice,
+                    ComPtr<ID3D11Texture2D> &pStaging, DXGI_OUTPUT_DESC &outputDesc);
+    bool releaseFrame(ComPtr<IDXGIOutputDuplication> &pDuplication);
+    bool getFrame(ComPtr<IDXGIOutputDuplication> &pDuplication, DXGI_OUTDUPL_FRAME_INFO &info,
+                  ComPtr<ID3D11Texture2D> &pFrame);
+    bool getMetaData(unsigned int size, MetaData &data);
+    bool getChanges(ComPtr<IDXGIOutputDuplication> &pDuplication, MetaData &data);
+    bool copyMove(ComPtr<ID3D11DeviceContext> &pContext, ComPtr<ID3D11Device> &pDevice,
+                  ComPtr<ID3D11Texture2D> &pStaging, ComPtr<ID3D11Texture2D> &pTemp, MetaData &data,
+                  DXGI_OUTPUT_DESC &outputDesc);
+    bool copyDirty(ComPtr<ID3D11DeviceContext> &pContext, MetaData &data,
+                   ComPtr<ID3D11Texture2D> &pStaging, ComPtr<ID3D11Texture2D> &pFrame);
+    bool getMapInfo(ComPtr<ID3D11DeviceContext> &pContext, ComPtr<ID3D11Texture2D> &pStaging,
+                    D3D11_MAPPED_SUBRESOURCE &mapInfo);
 private:
-    QVector<int>                            m_outputMap;
-    bool                                    m_initialized;
-    QVector<ComPtr<IDXGIOutput1>>           m_outputs;
-    int                                     m_outputID;
-    ComPtr<ID3D11Device>                    m_device;
-    ComPtr<ID3D11DeviceContext>             m_context;
-    ComPtr<IDXGIOutputDuplication>          m_duplication;
-    ComPtr<ID3D11Texture2D>                 m_stagingTexture;
-    QImage                                  m_snapshot;
+    QVector<UINT>                           m_outputMap;
     DYNAMIC_WAIT                            m_wait;
+    ComPtr<ID3D11Device> m_pDevice;
+    ComPtr<ID3D11DeviceContext> m_pContext;
+    ComPtr<ID3D11Texture2D> m_pStaging;
+    ComPtr<ID3D11Texture2D> m_pTemp;
+    ComPtr<IDXGIOutputDuplication> m_pDuplication;
+    DXGI_OUTPUT_DESC m_outputDesc;
+    D3D11_MAPPED_SUBRESOURCE m_mapInfo;
+    MetaData m_data;
+    bool m_running;
 };
 
 #endif // DESKTOPDUPLICATION_H

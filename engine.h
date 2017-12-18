@@ -11,12 +11,14 @@
 #include <QCoreApplication>
 #include "singlecolor.h"
 #include "desktopduplication.h"
+#include <QtDebug>
 
 class Engine : public QObject, public QQuickImageProvider
 {
     Q_OBJECT
     Q_PROPERTY(QString snapshot READ snapshot NOTIFY snapshotChanged)
     Q_PROPERTY(bool snapshotLoaded READ snapshotLoaded NOTIFY snapshotLoadedChanged)
+    Q_PROPERTY(QString actionName READ actionName WRITE setActionName NOTIFY actionNameChanged)
 
 public:
     explicit Engine(QScxmlStateMachine* mc, QObject *parent = nullptr);
@@ -36,12 +38,29 @@ public:
 
     virtual QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
 
+    QString actionName() const
+    {
+        return m_actionName;
+    }
+
 signals:
     void snapshotChanged();
     void snapshotLoadedChanged();
 
+    void actionNameChanged(QString actionName);
+
 public slots:
     void capture();
+
+    void setActionName(QString actionName)
+    {
+        if (m_actionName == actionName)
+            return;
+
+        m_actionName = actionName;
+        emit actionNameChanged(m_actionName);
+        qDebug()<<"actionNameChangded:"<<m_actionName;
+    }
 
 private:
     void delay()
@@ -62,6 +81,7 @@ private:
     SingleColor *m_dateSpot;
     SingleColor *m_timeSpot;
     DesktopDuplication m_duplication;
+    QString m_actionName;
 };
 
 #endif // OCRENGINE_H
