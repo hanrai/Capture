@@ -17,6 +17,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("sophia.com");
     QCoreApplication::setApplicationName("Capture");
 
+    qmlRegisterUncreatableType<SpotInfo>("com.sophia.SpotInfo", 1, 0, "SpotInfo", "");
+
     QScxmlStateMachine *machine = QScxmlStateMachine::fromFile(":statemachine.scxml");
     if (!machine->parseErrors().isEmpty()) {
         const auto errors = machine->parseErrors();

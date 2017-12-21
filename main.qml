@@ -2,17 +2,21 @@
 import QtQuick.Controls 2.2
 import Qt.labs.settings 1.0
 import QtScxml 5.8
+import com.sophia.SpotInfo 1.0
 
 ApplicationWindow {
     id: window
     title: qsTr("Capture")
     visible: true
     property int lastVisibility
+    property SpotInfo hs : engine.getTest()
 
     header: Banner {
         id: banner
     }
-
+Text{
+    text: hs.name
+}
     WindowStateSaver{
         window: window
         defaultWidth: 640

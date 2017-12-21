@@ -1,4 +1,4 @@
-#ifndef OCRENGINE_H
+﻿#ifndef OCRENGINE_H
 #define OCRENGINE_H
 
 #include <QObject>
@@ -12,6 +12,7 @@
 #include "singlecolor.h"
 #include "desktopduplication.h"
 #include <QtDebug>
+#include "spotinfo.h"
 
 class Engine : public QObject, public QQuickImageProvider
 {
@@ -30,12 +31,15 @@ public:
         return isSnapshotLoaded;
     }
 
+public slots:
     MousePosition *getMouseRanger() {return mp;}
     HotSpot *getHotSpot() {return m_hotSpot;}
     SingleColor *getContractSpot() {return m_contractSpot;}
     SingleColor *getDateSpot() {return m_dateSpot;}
     SingleColor *getTimeSpot() {return m_timeSpot;}
+    SpotInfo *getTest(){return m_mandatoryVector.at(0);}
 
+public:
     virtual QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
 
     QString actionName() const
@@ -70,18 +74,22 @@ private:
             QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     }
 
+    void initMandatoryVectory();
+
 private:
     bool isSnapshotLoaded;
     MousePosition *mp;
     Ocr ocr;
     QString snapName;
-    QScxmlStateMachine *machine;
+    QScxmlStateMachine *m_machine;
     HotSpot *m_hotSpot;
     SingleColor *m_contractSpot;
     SingleColor *m_dateSpot;
     SingleColor *m_timeSpot;
     DesktopDuplication m_duplication;
     QString m_actionName;
+    QVector<SpotInfo*> m_mandatoryVector;
+    QVector<SpotInfo*> m_optionalVectory;
 };
 
 #endif // OCRENGINE_H

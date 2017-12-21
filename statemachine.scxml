@@ -3,18 +3,18 @@
     <parallel id="StateMachine">
         <qt:editorinfo geometry="668.10;575.33;-855.12;-1075.14;1580.05;1675.14" scenegeometry="668.10;575.33;-187.02;-499.81;1580.05;1675.14"/>
         <state id="Main" initial="NoSnap">
-            <qt:editorinfo geometry="-158.13;-441.44;-669.57;-493.19;1406.57;1193.19" scenegeometry="509.97;133.89;-159.60;-359.30;1406.57;1193.19"/>
+            <qt:editorinfo geometry="-158.13;-441.44;-669.57;-493.19;1410.15;1193.19" scenegeometry="509.97;133.89;-159.60;-359.30;1410.15;1193.19"/>
             <state id="Ready">
-                <qt:editorinfo geometry="-149.46;-286.75;-327.47;-83.57;1184.43;522.73" scenegeometry="360.51;-152.86;33.04;-236.43;1184.43;522.73"/>
+                <qt:editorinfo geometry="-155.40;-285.56;-327.47;-83.57;1184.43;522.73" scenegeometry="354.57;-151.67;27.10;-235.24;1184.43;522.73"/>
                 <state id="Idle">
-                    <qt:editorinfo geometry="-109.47;37.79;-60;-50;120;100" scenegeometry="105.87;-91.76;45.87;-141.76;120;100"/>
+                    <qt:editorinfo geometry="-109.47;37.79;-60;-50;120;100" scenegeometry="245.10;-113.88;185.10;-163.88;120;100"/>
                     <transition type="external" event="Button.Clicked" target="Working" cond="_event.data.name != 'SnapShot'">
                         <qt:editorinfo endTargetFactors="36.98;9.96"/>
                         <log label="Clicked" expr="_event.data.name"/>
                     </transition>
                 </state>
                 <state id="Working">
-                    <qt:editorinfo geometry="-106.20;158.16;-60;-50;827;311" scenegeometry="109.15;-2.12;49.15;-52.12;827;311"/>
+                    <qt:editorinfo geometry="-106.20;158.16;-60;-50;827;311" scenegeometry="248.37;6.49;188.37;-43.51;827;311"/>
                     <onentry>
                         <assign location="actionName" expr="_event.data.name"/>
                         <send event="Action.Changged">
@@ -32,15 +32,15 @@
                     <data id="actionName"/>
                 </datamodel>
                 <transition type="internal" event="SnapshotChanged" target="Idle">
-                    <qt:editorinfo startTargetFactors="53.17;18.82"/>
+                    <qt:editorinfo startTargetFactors="35.96;16.77"/>
                 </transition>
             </state>
             <state id="SetDataSpot">
-                <qt:editorinfo geometry="222.34;558.81;-106;-50;166;100" scenegeometry="732.30;723.43;626.30;673.43;166;100"/>
+                <qt:editorinfo geometry="222.34;558.81;-106;-50;166;100" scenegeometry="732.31;692.70;626.31;642.70;166;100"/>
                 <transition type="external"/>
             </state>
             <state id="SetMousePosition">
-                <qt:editorinfo geometry="484.36;555.99;-106;-50;252;100" scenegeometry="994.32;720.61;888.32;670.61;252;100"/>
+                <qt:editorinfo geometry="484.36;555.99;-106;-50;252;100" scenegeometry="994.33;689.88;888.33;639.88;252;100"/>
                 <transition type="external"/>
                 <onentry>
                     <send event="SetMousePosition">
@@ -50,18 +50,18 @@
                 </onentry>
             </state>
             <state id="GetMousePosition">
-                <qt:editorinfo geometry="-440.57;531.22;-200;-50;332;116" scenegeometry="69.39;695.84;-130.61;645.84;332;116"/>
+                <qt:editorinfo geometry="-440.57;531.22;-200;-50;332;116" scenegeometry="69.40;665.11;-130.60;615.11;332;116"/>
                 <transition type="external" event="Mouse.RightClicked"/>
                 <transition type="external" event="Mouse.LeftClicked"/>
             </state>
             <state id="NoSnap">
-                <qt:editorinfo geometry="-477.57;-74.65;-172;-50;120;100" scenegeometry="32.39;89.97;-139.61;39.97;120;100"/>
+                <qt:editorinfo geometry="-477.57;-74.65;-172;-50;120;100" scenegeometry="32.40;59.24;-139.60;9.24;120;100"/>
                 <transition type="external" event="SnapshotLoaded" target="Ready">
-                    <qt:editorinfo endTargetFactors="13.24;59.65"/>
+                    <qt:editorinfo endTargetFactors="3.75;59.03"/>
                 </transition>
             </state>
             <state id="HotSpotScan">
-                <qt:editorinfo geometry="-50.08;519.07;-200;-50;311;159" scenegeometry="459.88;683.69;259.88;633.69;311;159"/>
+                <qt:editorinfo geometry="-50.08;519.07;-200;-50;311;159" scenegeometry="459.89;652.96;259.89;602.96;311;159"/>
                 <transition type="internal" event="Mouse.Moved">
                     <send event="HotSpot.Move">
                         <param name="X" expr="_event.data.X"/>

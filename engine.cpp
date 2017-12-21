@@ -8,19 +8,21 @@
 #include <QtDebug>
 #include <QElapsedTimer>
 
-Engine::Engine(QScxmlStateMachine *mc, QObject *parent) :
+Engine::Engine(QScxmlStateMachine *machine, QObject *parent) :
     QObject(parent),
     QQuickImageProvider(QQuickImageProvider::Image),
     isSnapshotLoaded(false),
-    machine(mc)
+    m_machine(machine)
 {
-    mp = new MousePosition(mc, this);
-    m_hotSpot = new HotSpot(&ocr, mc, this);
-    m_contractSpot = new SingleColor("Contract", machine, m_hotSpot, this);
-    m_dateSpot = new SingleColor("Date", machine, m_hotSpot, this);
-    m_timeSpot = new SingleColor("Time", machine, m_hotSpot, this);
+    mp = new MousePosition(machine, this);
+    m_hotSpot = new HotSpot(&ocr, machine, this);
+    m_contractSpot = new SingleColor("Contract", m_machine, m_hotSpot, this);
+    m_dateSpot = new SingleColor("Date", m_machine, m_hotSpot, this);
+    m_timeSpot = new SingleColor("Time", m_machine, m_hotSpot, this);
 
-    machine->connectToEvent(QLatin1String("Action.Changged"), this,
+    initMandatoryVectory();
+
+    m_machine->connectToEvent(QLatin1String("Action.Changged"), this,
         [this](const QScxmlEvent &event) {
         auto data = event.data().toMap();
         auto name = data.value("ActionName").toString();
@@ -68,4 +70,13 @@ void Engine::capture()
         emit snapshotLoadedChanged();
     }
     emit snapshotChanged();
+}
+
+void Engine::initMandatoryVectory()
+{
+    m_mandatoryVector.push_back(new SpotInfo(true, "鼠标指针", this));
+    m_mandatoryVector.push_back(new SpotInfo(true, "合约", this));
+    m_mandatoryVector.push_back(new SpotInfo(true, "日期", this));
+    m_mandatoryVector.push_back(new SpotInfo(true, "时间", this));
+    m_mandatoryVector.push_back(new SpotInfo(true, "点位", this));
 }

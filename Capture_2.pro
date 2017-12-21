@@ -20,7 +20,8 @@ SOURCES += main.cpp \
     hotspot.cpp \
     singlecolor.cpp \
     desktopduplication.cpp \
-    dynamic_wait.cpp
+    dynamic_wait.cpp \
+    spotinfo.cpp
 
 RESOURCES += qml.qrc
 
@@ -43,7 +44,8 @@ HEADERS += \
     hotspot.h \
     singlecolor.h \
     desktopduplication.h \
-    dynamic_wait.h
+    dynamic_wait.h \
+    spotinfo.h
 
 DISTFILES +=
 
