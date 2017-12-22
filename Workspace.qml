@@ -8,34 +8,34 @@ Image {
         acceptedButtons: Qt.AllButtons
         onPositionChanged: {
             machine.submitEvent("Mouse.Moved",
-                {"X": mouseX, "Y": mouseY})
+                {"pos": Qt.point(mouseX, mouseY)})
         }
         onClicked: {
             if(mouse.button & Qt.LeftButton) {
                 machine.submitEvent("Mouse.LeftClicked",
-                    {"X": mouseX, "Y": mouseY})
+                    {"pos": Qt.point(mouseX, mouseY)})
             }
             if(mouse.button & Qt.RightButton) {
                 machine.submitEvent("Mouse.RightClicked",
-                    {"X": mouseX, "Y": mouseY})
+                    {"pos": Qt.point(mouseX, mouseY)})
             }
             if(mouse.button & Qt.MiddleButton) {
                 machine.submitEvent("Mouse.MiddleClicked",
-                    {"X": mouseX, "Y": mouseY})
+                    {"pos": Qt.point(mouseX, mouseY)})
             }
         }
         onDoubleClicked: {
             if(mouse.button & Qt.LeftButton) {
                 machine.submitEvent("Mouse.LeftDoubleClicked",
-                    {"X": mouseX, "Y": mouseY})
+                    {"pos": Qt.point(mouseX, mouseY)})
             }
             if(mouse.button & Qt.RightButton) {
                 machine.submitEvent("Mouse.RightDoubleClicked",
-                    {"X": mouseX, "Y": mouseY})
+                    {"pos": Qt.point(mouseX, mouseY)})
             }
             if(mouse.button & Qt.MiddleButton) {
                 machine.submitEvent("Mouse.MiddleDoubleClicked",
-                    {"X": mouseX, "Y": mouseY})
+                    {"pos": Qt.point(mouseX, mouseY)})
             }
         }
     }

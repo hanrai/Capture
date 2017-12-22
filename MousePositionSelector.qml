@@ -22,7 +22,7 @@ Pane {
         CellTitle {
             id: title
             titleIcon: "qrc:/img/cursor.png"
-            titleText: "鼠标位置"
+            titleText: name
         }
         HSeparator {}
         Row {
@@ -75,7 +75,7 @@ Pane {
         State {
             name: "ACTIVED"
             extend: "ENABLED"
-            when: button.name === engine.actionName
+            when: button.name === engine.action
             PropertyChanges { target: bgc; opacity: 0.1 }
         },
         State {

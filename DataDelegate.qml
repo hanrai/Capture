@@ -4,7 +4,6 @@ import QtQuick.Controls 2.2
 Pane {
     id: panel
     property string titleIcon
-    property string titleText
     property alias name: button.name
     property int spotX
     property int spotY
@@ -26,7 +25,7 @@ Pane {
     Column {
         CellTitle {
             titleIcon: panel.titleIcon
-            titleText: panel.titleText
+            titleText: button.name
         }
         HSeparator {}
         Row {
@@ -87,7 +86,7 @@ Pane {
         State {
             name: "ACTIVED"
             extend: "ENABLED"
-            when: button.name === engine.actionName
+            when: button.name === engine.action
             PropertyChanges { target: bgc; opacity: 0.1 }
         },
         State {

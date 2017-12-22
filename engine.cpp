@@ -12,7 +12,8 @@ Engine::Engine(QScxmlStateMachine *machine, QObject *parent) :
     QObject(parent),
     QQuickImageProvider(QQuickImageProvider::Image),
     isSnapshotLoaded(false),
-    m_machine(machine)
+    m_machine(machine),
+    m_activeSpot(nullptr)
 {
     mp = new MousePosition(machine, this);
     m_hotSpot = new HotSpot(&ocr, machine, this);
@@ -21,13 +22,36 @@ Engine::Engine(QScxmlStateMachine *machine, QObject *parent) :
     m_timeSpot = new SingleColor("Time", m_machine, m_hotSpot, this);
 
     initMandatoryVectory();
+    initOptionalVectory();
 
     m_machine->connectToEvent(QLatin1String("Action.Changged"), this,
         [this](const QScxmlEvent &event) {
         auto data = event.data().toMap();
         auto name = data.value("ActionName").toString();
-        setActionName(name);
+        setAction(name);
     });
+    m_machine->connectToEvent(QLatin1String("SetMousePosition"), this,
+        [this](const QScxmlEvent &event) {
+        auto data = event.data().toMap();
+        auto pos = data.value("pos").toPoint();
+        auto spot = getSpotInfo("鼠标指针");
+        if(spot == nullptr)
+            return;
+        spot->setPosition(pos);
+    });
+}
+
+SpotInfo *Engine::getSpotInfo(QString name)
+{
+    foreach(SpotInfo *info, m_mandatoryVector)
+        if(info->name() == name)
+            return info;
+
+    foreach(SpotInfo *info, m_optionalVectory)
+        if(info->name() == name)
+            return info;
+
+    return nullptr;
 }
 
 QImage Engine::requestImage(const QString &, QSize *size, const QSize &)
@@ -72,6 +96,23 @@ void Engine::capture()
     emit snapshotChanged();
 }
 
+void Engine::setAction(QString actionName)
+{
+    if (m_actionName == actionName)
+        return;
+
+    m_actionName = actionName;
+
+    if(m_actionName.isEmpty())
+        m_activeSpot = nullptr;
+    else
+        m_activeSpot = getSpotInfo(m_actionName);
+
+    emit actionChanged(m_actionName);
+
+    qDebug()<<"actionNameChangded:"<<m_actionName;
+}
+
 void Engine::initMandatoryVectory()
 {
     m_mandatoryVector.push_back(new SpotInfo(true, "鼠标指针", this));
@@ -79,4 +120,20 @@ void Engine::initMandatoryVectory()
     m_mandatoryVector.push_back(new SpotInfo(true, "日期", this));
     m_mandatoryVector.push_back(new SpotInfo(true, "时间", this));
     m_mandatoryVector.push_back(new SpotInfo(true, "点位", this));
+}
+
+void Engine::initOptionalVectory()
+{
+    QSettings settings;
+    settings.beginGroup("spots/optional");
+
+    QStringList groups = settings.childGroups();
+    m_optionalModel.setStringList(groups);
+
+    foreach(auto group, groups)
+    {
+        SpotInfo *info = new SpotInfo(false, group, this);
+        m_optionalVectory.push_back(info);
+    }
+    settings.endGroup();
 }

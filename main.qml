@@ -9,14 +9,11 @@ ApplicationWindow {
     title: qsTr("Capture")
     visible: true
     property int lastVisibility
-    property SpotInfo hs : engine.getTest()
 
     header: Banner {
         id: banner
     }
-Text{
-    text: hs.name
-}
+
     WindowStateSaver{
         window: window
         defaultWidth: 640

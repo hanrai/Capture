@@ -49,15 +49,14 @@ ToolBar {
 
         MousePositionSelector {
             enabled: machine.Ready
-            name: "MousePosition"
+            name: "鼠标位置"
         }
 
         VSeparator {}
 
         DataDelegate {
             titleIcon: "qrc:/img/tag.png"
-            titleText: "合约"
-            name: "Contract"
+            name: "合约"
             spotX: contractSpot.spotX
             spotY: contractSpot.spotY
             spotWidth: contractSpot.spotWidth
@@ -70,8 +69,7 @@ ToolBar {
 
         DataDelegate {
             titleIcon: "qrc:/img/calendar.png"
-            titleText: "日期"
-            name: "Date"
+            name: "日期"
             spotX: dateSpot.spotX
             spotY: dateSpot.spotY
             spotWidth: dateSpot.spotWidth
@@ -84,8 +82,7 @@ ToolBar {
 
         DataDelegate {
             titleIcon: "qrc:/img/clock.png"
-            titleText: "时间"
-            name: "Time"
+            name: "时间"
             spotX: timeSpot.spotX
             spotY: timeSpot.spotY
             spotWidth: timeSpot.spotWidth
@@ -98,8 +95,7 @@ ToolBar {
 
         DataDelegate {
             titleIcon: "qrc:/img/dollar.png"
-            titleText: "点位"
-            name: "Position"
+            name: "点位"
             enabled: machine.Ready
         }
 

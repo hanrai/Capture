@@ -13,13 +13,14 @@
 #include "desktopduplication.h"
 #include <QtDebug>
 #include "spotinfo.h"
+#include <QStringListModel>
 
 class Engine : public QObject, public QQuickImageProvider
 {
     Q_OBJECT
     Q_PROPERTY(QString snapshot READ snapshot NOTIFY snapshotChanged)
     Q_PROPERTY(bool snapshotLoaded READ snapshotLoaded NOTIFY snapshotLoadedChanged)
-    Q_PROPERTY(QString actionName READ actionName WRITE setActionName NOTIFY actionNameChanged)
+    Q_PROPERTY(QString action READ action WRITE setAction NOTIFY actionChanged)
 
 public:
     explicit Engine(QScxmlStateMachine* mc, QObject *parent = nullptr);
@@ -37,12 +38,13 @@ public slots:
     SingleColor *getContractSpot() {return m_contractSpot;}
     SingleColor *getDateSpot() {return m_dateSpot;}
     SingleColor *getTimeSpot() {return m_timeSpot;}
-    SpotInfo *getTest(){return m_mandatoryVector.at(0);}
+
+    SpotInfo *getSpotInfo(QString name);
 
 public:
     virtual QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
 
-    QString actionName() const
+    QString action() const
     {
         return m_actionName;
     }
@@ -51,30 +53,16 @@ signals:
     void snapshotChanged();
     void snapshotLoadedChanged();
 
-    void actionNameChanged(QString actionName);
+    void actionChanged(QString action);
 
 public slots:
     void capture();
 
-    void setActionName(QString actionName)
-    {
-        if (m_actionName == actionName)
-            return;
-
-        m_actionName = actionName;
-        emit actionNameChanged(m_actionName);
-        qDebug()<<"actionNameChangded:"<<m_actionName;
-    }
+    void setAction(QString action);
 
 private:
-    void delay()
-    {
-        QTime dieTime= QTime::currentTime().addSecs(1);
-        while (QTime::currentTime() < dieTime)
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-    }
-
     void initMandatoryVectory();
+    void initOptionalVectory();
 
 private:
     bool isSnapshotLoaded;
@@ -89,7 +77,9 @@ private:
     DesktopDuplication m_duplication;
     QString m_actionName;
     QVector<SpotInfo*> m_mandatoryVector;
+    QStringListModel m_optionalModel;
     QVector<SpotInfo*> m_optionalVectory;
+    SpotInfo *m_activeSpot;
 };
 
 #endif // OCRENGINE_H

@@ -52,6 +52,7 @@ signals:
 public slots:
     void setShape(QRect shape);
     void setColors(QStringList colors);
+    void setPosition(QPoint &pos);
 
 private:
     void initDatas();
@@ -69,4 +70,5 @@ private:
     bool m_mandatory;
     bool m_initialized;
 };
+
 #endif // SPOTINFO_H

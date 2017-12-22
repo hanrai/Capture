@@ -56,17 +56,11 @@ public:
 
 signals:
     void spotXChanged(int spotX);
-
     void spotYChanged(int spotY);
-
     void spotWidthChanged(int spotWidth);
-
     void spotHeightChanged(int spotHeight);
-
     void activedChanged(bool actived);
-
     void nameChanged(QString name);
-
     void colorNameChanged(QString colorName);
 
 public slots:

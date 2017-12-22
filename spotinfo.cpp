@@ -52,13 +52,20 @@ void SpotInfo::setColors(QStringList colors)
     emit colorsChanged();
 }
 
+void SpotInfo::setPosition(QPoint &pos)
+{
+    QRect shape = m_shape;
+    shape.moveTo(pos);
+    setShape(shape);
+}
+
 void SpotInfo::initDatas()
 {
     if(m_name.isEmpty())
         return;
 
     QSettings settings;
-    if(settings.contains(key()))
+    if(settings.contains(key() + "shape"))
         readDatas();
     else
         writeDatas();

@@ -37,6 +37,6 @@ RoundButton {
     onClicked: {
         machine.submitEvent("Button.Clicked",
                                  {"name": name})
-        console.log(engine.actionName);
+        console.log(engine.action);
     }
 }
