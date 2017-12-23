@@ -47,11 +47,7 @@ Engine::Engine(QScxmlStateMachine *machine, QObject *parent) :
 
 SpotInfo *Engine::getSpotInfo(QString name)
 {
-    foreach(SpotInfo *info, m_mandatoryVector)
-        if(info->name() == name)
-            return info;
-
-    foreach(SpotInfo *info, m_optionalVectory)
+    foreach(SpotInfo *info, m_mandatoryVector + m_optionalVectory)
         if(info->name() == name)
             return info;
 

@@ -592,7 +592,6 @@ QImage DesktopDuplication::takeSnapshot(unsigned int output)
         if(!trySanpshot(output, snapShot))
         {
             m_wait.Wait();
-            //qDebug()<<"Retry";
             continue;
         }
         break;

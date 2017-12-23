@@ -22,21 +22,13 @@ void SpotInfo::setShape(QRect shape)
     writeDatas();
     emit shapeChanged(m_shape);
 
-    if(!m_shape.isEmpty())
+    // If shape is empty(true) and actived is true, we should turn off actived mark
+    // If shape is not empty(false) and active is false, we should turn on active mark
+    // There's a little trick, when shape and active mark are same, we should reverse the active mark.
+    if(m_shape.isEmpty() == m_actived)
     {
-        if(!m_actived)
-        {
-            m_actived = true;
-            emit activedChanged(m_actived);
-        }
-    }
-    else
-    {
-        if(m_actived)
-        {
-            m_actived = false;
-            emit activedChanged(m_actived);
-        }
+        m_actived = !m_actived;
+        emit activedChanged(m_actived);
     }
 }
 
