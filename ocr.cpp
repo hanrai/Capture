@@ -363,6 +363,14 @@ Ocr::Ocr(QObject *parent) : QObject(parent)
     charPattern.insert(iy, 'y');
 }
 
+void Ocr::setImageInfo(QRgb *buffer, QSize size, unsigned int rowPitch, unsigned int depthPitch)
+{
+    image.m_buffer = buffer;
+    image.m_rect.setSize(size);
+    image.m_rowPitch = rowPitch;
+    image.m_depthPitch = depthPitch;
+}
+
 bool Ocr::Scan(QPoint pos)
 {
     cursorPos = pos;

@@ -6,17 +6,29 @@
 #include <QBitArray>
 #include <QImage>
 #include "rect.h"
+struct Image
+{
+    Image():m_rowPitch(0),m_depthPitch(0),m_buffer(nullptr) {}
+
+    QRect rect() {return m_rect;}
+    QRgb pixel(QPoint pos) {return *(m_buffer+pos.x()+pos.y()*m_rowPitch/4);}
+
+    QRect m_rect;
+    quint32 m_rowPitch;
+    quint32 m_depthPitch;
+    QRgb *m_buffer;
+};
 
 class Ocr : public QObject
 {
     Q_OBJECT
 public:
     explicit Ocr(QObject *parent = nullptr);
-    QImage image;
 
 signals:
 
 public:
+    void setImageInfo(QRgb* buffer, QSize size, unsigned int rowPitch, unsigned int depthPitch);
     bool Scan(QPoint pos);
     QString getString();
     QRect getRect();
@@ -45,6 +57,8 @@ private:
     QPoint originPos;
     QString string;
     QRect stringRect;
+
+    Image image;
 };
 
 #endif // OCR_H

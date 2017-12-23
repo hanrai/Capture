@@ -1,11 +1,13 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtScxml 5.8
+import com.sophia.SpotInfo 1.0
 
 Pane {
     id: panel
     property string icon
-    property alias name: button.name
+    property string name
+    property SpotInfo info: engine.getSpotInfo(name)
     padding: 0
     anchors.verticalCenter: parent.verticalCenter
     opacity: 0.1
@@ -32,6 +34,7 @@ Pane {
             StateButton {
                 id: button
                 radius: 20
+                name: panel.name
                 source: "qrc:/img/target.png"
                 enabled: panel.enabled
             }
@@ -45,10 +48,10 @@ Pane {
                 spacing: 4
                 LabelText {text: "X"}
                 LabelText {text: ":"}
-                DataText {txt: mousePosition.spotX}
+                DataText {txt: info.shape.x}
                 LabelText {text: "Y"}
                 LabelText {text: ":"}
-                DataText {txt: mousePosition.spotY}
+                DataText {txt: info.shape.y}
             }
         }
         HSeparator {}
@@ -66,7 +69,7 @@ Pane {
                     height: 16
                     source: "qrc:/img/resize.png"
                 }
-                DataText {txt: mousePosition.spotRange}
+                DataText {txt: info.shape.width}
             }
         }
     }

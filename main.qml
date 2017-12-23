@@ -2,7 +2,6 @@
 import QtQuick.Controls 2.2
 import Qt.labs.settings 1.0
 import QtScxml 5.8
-import com.sophia.SpotInfo 1.0
 
 ApplicationWindow {
     id: window
@@ -108,9 +107,10 @@ ApplicationWindow {
                 machine.submitEvent("SnapshotChanged")}
             MousePositionIndicator {}
             HotSpotIndicator {}
-            SingleColorIndicator{obj: contractSpot; source: "qrc:/img/tag.png"}
-            SingleColorIndicator{obj: dateSpot; source: "qrc:/img/calendar.png"}
-            SingleColorIndicator{obj: timeSpot; source: "qrc:/img/clock.png"}
+            SpotIndicator{name:"合约"; source: "qrc:/img/tag.png"}
+            SpotIndicator{name:"日期"; source: "qrc:/img/calendar.png"}
+            SpotIndicator{name:"时间"; source: "qrc:/img/clock.png"}
+            SpotIndicator{name:"点位"; source: "qrc:/img/dollar.png"}
         }
 
         ScrollIndicator.vertical: ScrollIndicator { }

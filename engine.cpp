@@ -7,19 +7,16 @@
 #include <QUuid>
 #include <QtDebug>
 #include <QElapsedTimer>
+#include <QSettings>
 
 Engine::Engine(QScxmlStateMachine *machine, QObject *parent) :
     QObject(parent),
     QQuickImageProvider(QQuickImageProvider::Image),
-    isSnapshotLoaded(false),
+    m_snapshotLoaded(false),
     m_machine(machine),
     m_activeSpot(nullptr)
 {
-    mp = new MousePosition(machine, this);
-    m_hotSpot = new HotSpot(&ocr, machine, this);
-    m_contractSpot = new SingleColor("Contract", m_machine, m_hotSpot, this);
-    m_dateSpot = new SingleColor("Date", m_machine, m_hotSpot, this);
-    m_timeSpot = new SingleColor("Time", m_machine, m_hotSpot, this);
+    m_hotSpot = new HotSpot(&m_ocr, machine, this);
 
     initMandatoryVectory();
     initOptionalVectory();
@@ -30,14 +27,21 @@ Engine::Engine(QScxmlStateMachine *machine, QObject *parent) :
         auto name = data.value("ActionName").toString();
         setAction(name);
     });
+
     m_machine->connectToEvent(QLatin1String("SetMousePosition"), this,
         [this](const QScxmlEvent &event) {
         auto data = event.data().toMap();
         auto pos = data.value("pos").toPoint();
-        auto spot = getSpotInfo("鼠标指针");
-        if(spot == nullptr)
+        if(m_activeSpot == nullptr)
             return;
-        spot->setPosition(pos);
+        m_activeSpot->setPosition(pos);
+    });
+
+    m_machine->connectToEvent(QLatin1String("SetSpotData"), this,
+        [this](const QScxmlEvent &) {
+        Q_ASSERT(m_activeSpot);
+        m_activeSpot->setShape(m_hotSpot->shape());
+        //TODO: add color to color list
     });
 }
 
@@ -57,14 +61,19 @@ SpotInfo *Engine::getSpotInfo(QString name)
 QImage Engine::requestImage(const QString &, QSize *size, const QSize &)
 {
     if(size)
-        *size = ocr.image.size();
-    return ocr.image;
+        *size = m_snapShot.size();
+    return m_snapShot;
+}
+
+QString Engine::action() const
+{
+    if(m_activeSpot == nullptr)
+        return QString();
+    return m_activeSpot->name();
 }
 
 void Engine::capture()
 {
-    SnapshotInfo info;
-    m_duplication.beginCapture(0);
     QElapsedTimer timer;
     timer.start();
 
@@ -72,25 +81,20 @@ void Engine::capture()
 
     for(int i=0; i<c; i++)
     {
-        m_duplication.capture(info);
+        m_snapShot = m_duplication.takeSnapshot(0);
     }
 
     qDebug() << "FPS:" << 1000*c/(timer.elapsed());
-    QImage img(info.width, info.height, QImage::Format_ARGB32);
-    for(int i=0; i<img.height(); i++)
-    {
-        memcpy(
-            (void*)((char*)img.bits()+i*img.width()*4),
-            (void*)((char*)info.buffer+i*info.pitch),
-            img.width()*4);
-    }
-    m_duplication.endCapture();
 
-    snapName = QUuid::createUuid().toString();
-    ocr.image = img;
-    if(!isSnapshotLoaded)
+    m_snapshotName = QUuid::createUuid().toString();
+    m_ocr.setImageInfo((QRgb*)m_snapShot.bits(),
+                     m_snapShot.size(),
+                     m_snapShot.width()*4,
+                     m_snapShot.width()*4*m_snapShot.height());
+
+    if(!m_snapshotLoaded)
     {
-        isSnapshotLoaded = true;
+        m_snapshotLoaded = true;
         emit snapshotLoadedChanged();
     }
     emit snapshotChanged();
@@ -98,24 +102,30 @@ void Engine::capture()
 
 void Engine::setAction(QString actionName)
 {
-    if (m_actionName == actionName)
+    if(actionName.isEmpty())
+    {
+        if(m_activeSpot != nullptr)
+        {
+            m_activeSpot = nullptr;
+            emit actionChanged(actionName);
+        }
         return;
+    }
 
-    m_actionName = actionName;
+    if(m_activeSpot != nullptr)
+    {
+        if(m_activeSpot->name() == actionName)
+            return;
+    }
 
-    if(m_actionName.isEmpty())
-        m_activeSpot = nullptr;
-    else
-        m_activeSpot = getSpotInfo(m_actionName);
-
-    emit actionChanged(m_actionName);
-
-    qDebug()<<"actionNameChangded:"<<m_actionName;
+    m_activeSpot = getSpotInfo(actionName);
+    Q_ASSERT(m_activeSpot);
+    emit actionChanged(actionName);
 }
 
 void Engine::initMandatoryVectory()
 {
-    m_mandatoryVector.push_back(new SpotInfo(true, "鼠标指针", this));
+    m_mandatoryVector.push_back(new SpotInfo(true, "鼠标位置", this));
     m_mandatoryVector.push_back(new SpotInfo(true, "合约", this));
     m_mandatoryVector.push_back(new SpotInfo(true, "日期", this));
     m_mandatoryVector.push_back(new SpotInfo(true, "时间", this));

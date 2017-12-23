@@ -15,10 +15,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp \
     ocr.cpp \
     rect.cpp \
-    mouseposition.cpp \
     engine.cpp \
     hotspot.cpp \
-    singlecolor.cpp \
     desktopduplication.cpp \
     dynamic_wait.cpp \
     spotinfo.cpp
@@ -39,10 +37,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     ocr.h \
     rect.h \
-    mouseposition.h \
     engine.h \
     hotspot.h \
-    singlecolor.h \
     desktopduplication.h \
     dynamic_wait.h \
     spotinfo.h

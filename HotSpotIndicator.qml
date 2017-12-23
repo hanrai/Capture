@@ -2,10 +2,10 @@ import QtQuick 2.0
 import QtQuick.Controls 2.3
 
 Button {
-    x: hotSpot.spotX
-    y: hotSpot.spotY
-    width: hotSpot.spotWidth
-    height: hotSpot.spotHeight
+    x: hotSpot.shape.x
+    y: hotSpot.shape.y
+    width: hotSpot.shape.width
+    height: hotSpot.shape.height
     visible: hotSpot.actived
     contentItem: Rectangle {
         anchors.fill: parent

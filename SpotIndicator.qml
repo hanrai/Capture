@@ -1,12 +1,15 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.3
+import com.sophia.SpotInfo 1.0
+
 Item {
-    x: obj.spotX
-    y: obj.spotY - 16
-    width: obj.spotWidth
-    height: obj.spotHeight + 16
-    visible: obj.actived && !machine.NoSnap
-    property var obj
+    x: spot.shape.x
+    y: spot.shape.y - 16
+    width: spot.shape.width
+    height: spot.shape.height + 16
+    visible: spot.actived && !machine.NoSnap
+    property string name
+    property SpotInfo spot: engine.getSpotInfo(name)
     property alias source: icon.source
 
     Image {
@@ -21,8 +24,8 @@ Item {
         id: button
         x: 0
         y: 16
-        width: obj.spotWidth
-        height: obj.spotHeight
+        width: spot.shape.width
+        height: spot.shape.height
         contentItem: Rectangle {
             anchors.fill: parent
             opacity: button.down ? 0.4 : 0.7

@@ -2,18 +2,16 @@
 #define OCRENGINE_H
 
 #include <QObject>
-#include <ocr.h>
 #include <QQuickImageProvider>
 #include <QScxmlStateMachine>
-#include "mouseposition.h"
-#include "hotspot.h"
 #include <QTime>
 #include <QCoreApplication>
-#include "singlecolor.h"
-#include "desktopduplication.h"
 #include <QtDebug>
-#include "spotinfo.h"
 #include <QStringListModel>
+#include "desktopduplication.h"
+#include "ocr.h"
+#include "hotspot.h"
+#include "spotinfo.h"
 
 class Engine : public QObject, public QQuickImageProvider
 {
@@ -26,38 +24,27 @@ public:
     explicit Engine(QScxmlStateMachine* mc, QObject *parent = nullptr);
 
     QString snapshot() const {
-        return snapName;
+        return m_snapshotName;
     }
     bool snapshotLoaded() const {
-        return isSnapshotLoaded;
+        return m_snapshotLoaded;
     }
 
 public slots:
-    MousePosition *getMouseRanger() {return mp;}
     HotSpot *getHotSpot() {return m_hotSpot;}
-    SingleColor *getContractSpot() {return m_contractSpot;}
-    SingleColor *getDateSpot() {return m_dateSpot;}
-    SingleColor *getTimeSpot() {return m_timeSpot;}
-
     SpotInfo *getSpotInfo(QString name);
 
 public:
     virtual QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
-
-    QString action() const
-    {
-        return m_actionName;
-    }
+    QString action() const;
 
 signals:
     void snapshotChanged();
     void snapshotLoadedChanged();
-
     void actionChanged(QString action);
 
 public slots:
     void capture();
-
     void setAction(QString action);
 
 private:
@@ -65,21 +52,17 @@ private:
     void initOptionalVectory();
 
 private:
-    bool isSnapshotLoaded;
-    MousePosition *mp;
-    Ocr ocr;
-    QString snapName;
+    bool m_snapshotLoaded;
+    Ocr m_ocr;
+    QString m_snapshotName;
     QScxmlStateMachine *m_machine;
     HotSpot *m_hotSpot;
-    SingleColor *m_contractSpot;
-    SingleColor *m_dateSpot;
-    SingleColor *m_timeSpot;
     DesktopDuplication m_duplication;
-    QString m_actionName;
     QVector<SpotInfo*> m_mandatoryVector;
     QStringListModel m_optionalModel;
     QVector<SpotInfo*> m_optionalVectory;
     SpotInfo *m_activeSpot;
+    QImage m_snapShot;
 };
 
 #endif // OCRENGINE_H

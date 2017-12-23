@@ -5,7 +5,6 @@
 #include <QFont>
 #include <QtDebug>
 #include "engine.h"
-#include "mouseposition.h"
 
 int main(int argc, char *argv[])
 {
@@ -31,10 +30,6 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("engine", mainEngine);
     engine.rootContext()->setContextProperty("hotSpot", mainEngine->getHotSpot());
-    engine.rootContext()->setContextProperty("contractSpot", mainEngine->getContractSpot());
-    engine.rootContext()->setContextProperty("dateSpot", mainEngine->getDateSpot());
-    engine.rootContext()->setContextProperty("timeSpot", mainEngine->getTimeSpot());
-    engine.rootContext()->setContextProperty("mousePosition", mainEngine->getMouseRanger());
     engine.rootContext()->setContextProperty("machine", machine);
     engine.addImageProvider("snapshot", mainEngine);
     machine->start();
