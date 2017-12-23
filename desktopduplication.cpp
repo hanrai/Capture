@@ -268,10 +268,7 @@ bool DesktopDuplication::getFrame(ComPtr<IDXGIOutputDuplication> &pDuplication, 
         hr = pDuplication->AcquireNextFrame(500, &info, &resource);
         if(hr==DXGI_ERROR_WAIT_TIMEOUT || info.TotalMetadataBufferSize==0)
         {
-            //qDebug()<<"NextFrame retry:"<<info.TotalMetadataBufferSize<<":"<<(void*)hr;
             releaseFrame(pDuplication);
-            //auto r = pDuplication->ReleaseFrame();
-            //qDebug()<<"release result:"<< (void*)r;
             continue;
         }
         if (FAILED(hr))
@@ -281,7 +278,7 @@ bool DesktopDuplication::getFrame(ComPtr<IDXGIOutputDuplication> &pDuplication, 
         }
         break;
     }
-//qDebug()<<"Got";
+
     hr = resource.As(&pFrame);
     if (FAILED(hr))
     {
