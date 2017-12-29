@@ -18,7 +18,8 @@ public slots:
 
 private:
     void 初始化界面();
-    void 重设屏幕截图();
+private slots:
+    void resetSnapshots(bool);
 
 private:
     ListWidget *m_屏幕截图视图;

@@ -8,7 +8,7 @@
 MonitorListWindow::MonitorListWindow(QWidget *parent) : QMainWindow(parent)
 {
     初始化界面();
-    重设屏幕截图();
+    resetSnapshots(false);
 }
 
 void MonitorListWindow::初始化界面()
@@ -20,6 +20,8 @@ void MonitorListWindow::初始化界面()
     const QIcon 刷新图标 = QIcon(":/img/ico/Action-reload.ico");
     auto 刷新 = new QAction(刷新图标, tr("Rescan"), this);
     刷新->setStatusTip(tr("Show/Hide monitor list."));
+    connect(刷新, &QAction::triggered, this, &MonitorListWindow::resetSnapshots);
+
     监视器列表工具栏->addAction(刷新);
 
     m_屏幕截图视图 = new ListWidget;
@@ -33,7 +35,7 @@ void MonitorListWindow::初始化界面()
     setCentralWidget(m_屏幕截图视图);
 }
 
-void MonitorListWindow::重设屏幕截图()
+void MonitorListWindow::resetSnapshots(bool)
 {
     m_屏幕截图视图->clear();
     DesktopDuplication duplication(this);
