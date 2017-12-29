@@ -11,7 +11,7 @@ Pane {
     padding: 0
     anchors.verticalCenter: parent.verticalCenter
     opacity: 0.1
-    enabled: false
+    enabled: machine.Ready
 
     background: Rectangle {
         id:bgc

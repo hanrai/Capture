@@ -1,5 +1,7 @@
-QT += core quick scxml
+QT += core quick gui scxml
+QT += widgets
 CONFIG += c++11
+TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -19,6 +21,30 @@ SOURCES += main.cpp \
     hotspot.cpp \
     desktopduplication.cpp \
     dynamic_wait.cpp \
+    spotinfo.cpp \
+    canva.cpp \
+    mainwindow.cpp \
+    canva.cpp \
+    desktopduplication.cpp \
+    dynamic_wait.cpp \
+    engine.cpp \
+    hotspot.cpp \
+    main.cpp \
+    mainwindow.cpp \
+    ocr.cpp \
+    rect.cpp \
+    spotinfo.cpp \
+    MonitorList/listwidget.cpp \
+    MonitorList/monitorlistwindow.cpp \
+    canva.cpp \
+    desktopduplication.cpp \
+    dynamic_wait.cpp \
+    engine.cpp \
+    hotspot.cpp \
+    main.cpp \
+    mainwindow.cpp \
+    ocr.cpp \
+    rect.cpp \
     spotinfo.cpp
 
 RESOURCES += qml.qrc
@@ -41,6 +67,28 @@ HEADERS += \
     hotspot.h \
     desktopduplication.h \
     dynamic_wait.h \
+    spotinfo.h \
+    canva.h \
+    mainwindow.h \
+    canva.h \
+    desktopduplication.h \
+    dynamic_wait.h \
+    engine.h \
+    hotspot.h \
+    mainwindow.h \
+    ocr.h \
+    rect.h \
+    spotinfo.h \
+    MonitorList/listwidget.h \
+    MonitorList/monitorlistwindow.h \
+    canva.h \
+    desktopduplication.h \
+    dynamic_wait.h \
+    engine.h \
+    hotspot.h \
+    mainwindow.h \
+    ocr.h \
+    rect.h \
     spotinfo.h
 
 DISTFILES +=
@@ -68,3 +116,8 @@ DEPENDPATH += 'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64'
 
 win32:!win32-g++: PRE_TARGETDEPS += 'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64/User32.lib'
 else:win32-g++: PRE_TARGETDEPS += 'C:/Program Files (x86)/Windows Kits/10/Lib/10.0.16299.0/um/x64/libUser32.a'
+
+FORMS +=
+
+STATECHARTS += \
+    CanvaMachine.scxml

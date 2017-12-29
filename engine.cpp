@@ -43,6 +43,19 @@ Engine::Engine(QScxmlStateMachine *machine, QObject *parent) :
         m_activeSpot->setShape(m_hotSpot->shape());
         //TODO: add color to color list
     });
+
+    m_machine->connectToEvent(QLatin1String("AddSpot.Add"), this,
+        [this](const QScxmlEvent &event) {
+        auto data = event.data().toMap();
+        auto name = data.value("name").toString();
+        if(getSpotInfo(name) != nullptr)
+            m_machine->submitEvent("AddSpot.Duplicated");
+        SpotInfo *info = new SpotInfo(false, name, this);
+        m_optionalVectory.push_back(info);
+        Q_ASSERT(m_optionalModel.insertRow(0));
+        Q_ASSERT(m_optionalModel.setData(m_optionalModel.index(0), name, Qt::DisplayRole));
+        m_machine->submitEvent("AddSpot.Done");
+    });
 }
 
 SpotInfo *Engine::getSpotInfo(QString name)

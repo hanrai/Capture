@@ -512,6 +512,7 @@ void DesktopDuplication::end(ComPtr<ID3D11Device> &pDevice, ComPtr<ID3D11DeviceC
 bool DesktopDuplication::prepareOutputMap()
 {
     m_outputMap.clear();
+    m_outputDescMap.clear();
 
     ComPtr<IDXGIFactory1> pFactory;
     if(!getFactory(pFactory))
@@ -532,7 +533,11 @@ bool DesktopDuplication::prepareOutputMap()
                 ho = pAdapter->EnumOutputs(outputCount, &pOutput);
                 if(pOutput && (ho != DXGI_ERROR_NOT_FOUND))
                 {
-                    m_outputMap.append(adapterCount);
+                    m_outputMap.push_back(adapterCount);
+                    DXGI_OUTPUT_DESC desc;
+                    ZeroMemory(&desc, sizeof(desc));
+                    pOutput->GetDesc(&desc);
+                    m_outputDescMap.push_back(desc);
                 }
             }
         }
@@ -635,4 +640,19 @@ bool DesktopDuplication::capture(SnapshotInfo &info)
     info.buffer = (QRgb*)m_mapInfo.pData;
     info.pitch = m_mapInfo.RowPitch;
     return true;
+}
+
+const DXGI_OUTPUT_DESC &DesktopDuplication::getOutputDesc(unsigned int output)
+{
+    if(output >= m_outputMap.size())
+    {
+        prepareOutputMap();
+    }
+
+    if(output >= m_outputMap.size())
+    {
+        ProcessFailure(__FILE__, __LINE__, nullptr, L"Output not found.", L"Error", DXGI_ERROR_NOT_FOUND);
+    }
+
+    return m_outputDescMap.at(output);
 }

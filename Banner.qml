@@ -44,7 +44,6 @@ ToolBar {
         DataDelegate {
             titleIcon: "qrc:/img/tag.png"
             name: "合约"
-            enabled: machine.Ready
         }
 
         VSeparator {}
@@ -52,7 +51,6 @@ ToolBar {
         DataDelegate {
             titleIcon: "qrc:/img/calendar.png"
             name: "日期"
-            enabled: machine.Ready
         }
 
         VSeparator {}
@@ -60,7 +58,6 @@ ToolBar {
         DataDelegate {
             titleIcon: "qrc:/img/clock.png"
             name: "时间"
-            enabled: machine.Ready
         }
 
         VSeparator {}
@@ -68,7 +65,6 @@ ToolBar {
         DataDelegate {
             titleIcon: "qrc:/img/dollar.png"
             name: "点位"
-            enabled: machine.Ready
         }
 
         VSeparator {}

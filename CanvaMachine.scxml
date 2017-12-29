@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="CanvaMachine" qt:editorversion="4.4.83">
+    <state id="CanvaStateMachine">
+        <qt:editorinfo scenegeometry="49.16;65.44;-27.76;-0.05;1180.92;888.49" geometry="49.16;65.44;-76.92;-65.49;1180.92;888.49"/>
+        <state id="Init">
+            <qt:editorinfo scenegeometry="51.20;151.55;-8.80;101.55;120;100" geometry="3.08;80.89;-60;-50;120;100"/>
+            <transition type="external" event="ImageChanged" target="Ready">
+                <qt:editorinfo movePoint="7.30;8.34" endTargetFactors="28.17;52.65"/>
+            </transition>
+        </state>
+        <state id="Ready">
+            <qt:editorinfo scenegeometry="276.47;148.48;216.47;98.48;120;100" geometry="228.35;77.82;-60;-50;120;100"/>
+        </state>
+    </state>
+</scxml>

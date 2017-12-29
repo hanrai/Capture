@@ -68,7 +68,6 @@ private:
     bool m_mismatch;
 
     bool m_mandatory;
-    bool m_initialized;
 };
 
 #endif // SPOTINFO_H

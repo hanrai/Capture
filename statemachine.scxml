@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="statemachine" datamodel="ecmascript" qt:editorversion="4.4.83">
     <parallel id="StateMachine">
-        <qt:editorinfo scenegeometry="668.10;575.33;-187.02;-537.81;1580.05;1281.14" geometry="668.10;575.33;-855.12;-1113.14;1580.05;1281.14"/>
+        <qt:editorinfo geometry="-190.36;98.38;-1034.50;-1089.22;1639.70;1193.22" scenegeometry="-190.36;98.38;-1224.86;-990.84;1639.70;1193.22"/>
         <state id="Main" initial="NoSnap">
-            <qt:editorinfo scenegeometry="509.97;133.89;-159.60;-395.02;1410.15;1050.91" geometry="-158.13;-441.44;-669.57;-528.91;1410.15;1050.91"/>
+            <qt:editorinfo geometry="-158.13;-441.44;-856.37;-536.19;1566.65;1045.15" scenegeometry="509.97;-387.20;-346.40;-923.39;1566.65;1045.15"/>
             <state id="Ready">
-                <qt:editorinfo scenegeometry="338.26;-191.65;10.79;-281.29;1184.43;605.80" geometry="-171.71;-325.54;-327.47;-89.64;1184.43;605.80"/>
+                <qt:editorinfo geometry="-171.71;-325.54;-391.28;-103.04;1060.03;836.47" scenegeometry="338.26;-712.74;-53.02;-815.78;1060.03;836.47"/>
                 <state id="Idle">
-                    <qt:editorinfo scenegeometry="523.50;-152.86;398.50;-202.86;409;100" geometry="185.24;38.79;-125;-50;409;100"/>
+                    <qt:editorinfo geometry="-57.28;37.15;-125;-50;768;100" scenegeometry="280.98;-675.59;155.98;-725.59;768;100"/>
                 </state>
                 <state id="Working">
-                    <qt:editorinfo scenegeometry="234.21;37.83;157.88;-89.20;843.33;358.04" geometry="-104.05;229.48;-76.33;-127.03;843.33;358.04"/>
+                    <qt:editorinfo geometry="-104.05;229.48;-77.29;-127.03;657.29;358.04" scenegeometry="234.21;-483.26;156.92;-610.29;657.29;358.04"/>
                     <onentry>
                         <assign location="actionName" expr="_event.data.name"/>
                         <send event="Action.Changged">
@@ -24,18 +24,18 @@
                         </send>
                     </onexit>
                     <state id="Init">
-                        <qt:editorinfo scenegeometry="237.88;160.86;177.88;110.86;120;100" geometry="3.67;123.03;-60;-50;120;100"/>
+                        <qt:editorinfo geometry="3.67;123.03;-60;-50;120;100" scenegeometry="237.88;-360.23;177.88;-410.23;120;100"/>
                         <transition type="external" target="Other" cond="actionName !== '鼠标位置'">
-                            <qt:editorinfo movePoint="151.12;4.98" startTargetFactors="84.56;49.94"/>
+                            <qt:editorinfo startTargetFactors="84.56;49.94" movePoint="151.12;4.98"/>
                         </transition>
                         <transition type="external" target="MousePosition" cond="actionName === '鼠标位置'">
-                            <qt:editorinfo startTargetFactors="59.15;21.55"/>
+                            <qt:editorinfo startTargetFactors="48.78;11.21"/>
                         </transition>
                     </state>
                     <state id="Other">
-                        <qt:editorinfo scenegeometry="717.50;171.77;309.50;115.56;587;92.21" geometry="483.29;133.94;-408;-56.21;587;92.21"/>
+                        <qt:editorinfo geometry="483.29;133.94;-408;-56.21;453;92.21" scenegeometry="717.50;-349.32;309.50;-405.53;453;92.21"/>
                         <transition type="external" event="Mouse.RightClicked" target="Idle">
-                            <qt:editorinfo endTargetFactors="87.56;68.98" startTargetFactors="91.89;9.48"/>
+                            <qt:editorinfo endTargetFactors="73.20;87.07" startTargetFactors="90.50;17.56" movePoint="31.13;-65.55"/>
                         </transition>
                         <transition type="internal" event="Mouse.Moved">
                             <send event="HotSpot.Moved">
@@ -46,26 +46,26 @@
                             <send event="HotSpot.Disable"/>
                         </onexit>
                         <transition type="external" event="HotSpot.Clicked" target="SetDataBeforeExitWorking">
-                            <qt:editorinfo movePoint="-36.14;9.73"/>
+                            <qt:editorinfo endTargetFactors="24.23;87.93" startTargetFactors="51.71;12.01" movePoint="-4.23;8.70"/>
                             <send event="SetSpotData"/>
                         </transition>
                     </state>
                     <state id="MousePosition">
-                        <qt:editorinfo scenegeometry="459.03;38.29;190.03;-11.71;120;100" geometry="224.82;0.46;-269;-50;120;100"/>
+                        <qt:editorinfo geometry="211.71;-4.44;-269;-50;120;100" scenegeometry="445.92;-487.70;176.92;-537.70;120;100"/>
                         <transition type="external" target="SetDataBeforeExitWorking" event="Mouse.LeftClicked">
-                            <qt:editorinfo endTargetFactors="13.64;54.43" movePoint="5.62;10.89"/>
+                            <qt:editorinfo endTargetFactors="3.73;51.39" startTargetFactors="91.18;52.52" movePoint="5.62;10.89"/>
                             <send event="SetMousePosition">
                                 <param name="pos" expr="_event.data.pos"/>
                             </send>
                         </transition>
                         <transition type="external" event="Mouse.RightClicked" target="Idle">
-                            <qt:editorinfo endTargetFactors="6.10;61.71" movePoint="-12.66;16.36"/>
+                            <qt:editorinfo endTargetFactors="10.45;74.14" startTargetFactors="49.71;15.52" movePoint="23.39;-0.03"/>
                         </transition>
                     </state>
                     <state id="SetDataBeforeExitWorking">
-                        <qt:editorinfo scenegeometry="550.51;34.37;490.51;-15.63;225;100" geometry="316.30;-3.46;-60;-50;225;100"/>
+                        <qt:editorinfo geometry="316.30;-3.46;-60;-50;225;100" scenegeometry="550.51;-486.72;490.51;-536.72;225;100"/>
                         <transition type="external" target="Idle">
-                            <qt:editorinfo movePoint="26.41;36.83"/>
+                            <qt:editorinfo endTargetFactors="57.70;76.72" startTargetFactors="48.24;13.79" movePoint="26.41;36.83"/>
                         </transition>
                     </state>
                 </state>
@@ -73,17 +73,45 @@
                     <data id="actionName"/>
                 </datamodel>
                 <transition type="internal" event="SnapshotChanged" target="Idle">
-                    <qt:editorinfo startTargetFactors="12.05;14.43"/>
+                    <qt:editorinfo endTargetFactors="11.29;56.33" startTargetFactors="5.75;18.25"/>
+                </transition>
+                <transition type="external" event="Button.Clicked" target="AddSpot" cond="_event.data.name == 'AddSpot'">
+                    <qt:editorinfo endTargetFactors="1.88;57.02" startTargetFactors="4.20;79.37" movePoint="8.19;3.28"/>
                 </transition>
                 <transition type="external" event="Button.Clicked" target="Working" cond="_event.data.name != 'SnapShot'">
-                    <qt:editorinfo endTargetFactors="14.68;6.15" movePoint="-12.97;4.32" startTargetFactors="3.81;17"/>
-                    <log label="Clicked" expr="_event.data.name"/>
+                    <qt:editorinfo endTargetFactors="3.43;43.85" startTargetFactors="4.65;42.64" movePoint="-12.97;4.32"/>
                 </transition>
+                <state id="AddSpot">
+                    <qt:editorinfo geometry="-280.92;422.05;98.75;44.44;767.78;170.21" scenegeometry="57.34;-290.69;156.09;-246.25;767.78;170.21"/>
+                    <transition type="external" event="AddSpot.Done" target="Idle">
+                        <qt:editorinfo endTargetFactors="92.72;86.21" startTargetFactors="92.71;12.93" movePoint="62.27;13.11"/>
+                    </transition>
+                    <state id="AddSpotInit">
+                        <qt:editorinfo geometry="367.25;144.65;-60;-50;164;100" scenegeometry="424.59;-146.04;364.59;-196.04;164;100"/>
+                        <transition type="external" event="AddSpot.Duplicated" target="AddSpotDuplicated">
+                            <qt:editorinfo endTargetFactors="5.97;50.23"/>
+                        </transition>
+                    </state>
+                    <state id="AddSpotDuplicated">
+                        <qt:editorinfo geometry="684.53;144.65;-60;-50;185;100" scenegeometry="741.87;-146.04;681.87;-196.04;185;100"/>
+                    </state>
+                    <transition type="internal" event="AddSpot.Ok">
+                        <send event="AddSpot.Add">
+                            <param name="name" expr="_event.data.name"/>
+                        </send>
+                    </transition>
+                    <onentry>
+                        <log label="AddSpot" expr="'Enter AddSpot'"/>
+                    </onentry>
+                    <onexit>
+                        <log label="AddSpot" expr="'Exit AddSpot'"/>
+                    </onexit>
+                </state>
             </state>
             <state id="NoSnap">
-                <qt:editorinfo scenegeometry="32.40;59.24;-139.60;9.24;120;100" geometry="-477.57;-74.65;-172;-50;120;100"/>
+                <qt:editorinfo geometry="-664.37;-31.13;-172;-50;120;100" scenegeometry="-154.40;-418.33;-326.40;-468.33;120;100"/>
                 <transition type="external" event="SnapshotLoaded" target="Ready">
-                    <qt:editorinfo endTargetFactors="3.75;59.03"/>
+                    <qt:editorinfo endTargetFactors="1.12;47.44"/>
                 </transition>
             </state>
         </state>

@@ -7,8 +7,7 @@ SpotInfo::SpotInfo(bool mandatory, QString name, QObject *parent) :
     m_name(name),
     m_actived(false),
     m_mismatch(true),
-    m_mandatory(mandatory),
-    m_initialized(false)
+    m_mandatory(mandatory)
 {
     initDatas();
 }
@@ -61,7 +60,6 @@ void SpotInfo::initDatas()
         readDatas();
     else
         writeDatas();
-    m_initialized = true;
 }
 
 QString SpotInfo::key()
@@ -82,9 +80,6 @@ void SpotInfo::readDatas()
 
 void SpotInfo::writeDatas()
 {
-    if(!m_initialized)
-        return;
-
     QSettings settings;
     settings.setValue(key() + "shape", m_shape);
     settings.setValue(key() + "colors", m_colors.stringList());

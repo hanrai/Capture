@@ -57,6 +57,7 @@ public:
     bool beginCapture(unsigned int output);
     bool endCapture();
     bool capture(SnapshotInfo &info);
+    const DXGI_OUTPUT_DESC &getOutputDesc(unsigned int output);
 
 public:
     class Exception
@@ -119,6 +120,7 @@ private:
                     D3D11_MAPPED_SUBRESOURCE &mapInfo);
 private:
     QVector<UINT>                           m_outputMap;
+    QVector<DXGI_OUTPUT_DESC>               m_outputDescMap;
     DYNAMIC_WAIT                            m_wait;
     ComPtr<ID3D11Device> m_pDevice;
     ComPtr<ID3D11DeviceContext> m_pContext;

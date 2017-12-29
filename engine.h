@@ -33,6 +33,7 @@ public:
 public slots:
     HotSpot *getHotSpot() {return m_hotSpot;}
     SpotInfo *getSpotInfo(QString name);
+    QStringListModel *getOptionalModel() {return &m_optionalModel;}
 
 public:
     virtual QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);

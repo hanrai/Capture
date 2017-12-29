@@ -18,6 +18,8 @@
         <file>MousePositionIndicator.qml</file>
         <file>HotSpotIndicator.qml</file>
         <file>SpotIndicator.qml</file>
+        <file>SpotsList.qml</file>
+        <file>AddSpotDialog.qml</file>
     </qresource>
     <qresource prefix="/img">
         <file>cursor.png</file>
@@ -31,5 +33,10 @@
         <file>mouse.png</file>
         <file>target.png</file>
         <file>photo-camera.svg</file>
+        <file>add.svg</file>
+        <file>line-chart.svg</file>
+        <file>icons/apps/desktopshare.png</file>
+        <file>ico/App-desktop-share.ico</file>
+        <file>ico/Action-reload.ico</file>
     </qresource>
 </RCC>
