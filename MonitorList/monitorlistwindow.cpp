@@ -5,10 +5,12 @@
 #include "desktopduplication.h"
 #include "listwidget.h"
 
-MonitorListWindow::MonitorListWindow(QWidget *parent) : QMainWindow(parent)
+MonitorListWindow::MonitorListWindow(QWidget *parent) :
+    QMainWindow(parent),
+    m_currentMonitor(0)
 {
     初始化界面();
-    resetSnapshots(false);
+    resetScreenList();
 }
 
 void MonitorListWindow::初始化界面()
@@ -20,7 +22,7 @@ void MonitorListWindow::初始化界面()
     const QIcon 刷新图标 = QIcon(":/img/ico/Action-reload.ico");
     auto 刷新 = new QAction(刷新图标, tr("Rescan"), this);
     刷新->setStatusTip(tr("Show/Hide monitor list."));
-    connect(刷新, &QAction::triggered, this, &MonitorListWindow::resetSnapshots);
+    QObject::connect(刷新, &QAction::triggered, this, &MonitorListWindow::resetScreenList);
 
     监视器列表工具栏->addAction(刷新);
 
@@ -33,9 +35,11 @@ void MonitorListWindow::初始化界面()
     m_屏幕截图视图->setWrapping(false);
 
     setCentralWidget(m_屏幕截图视图);
+
+    connect(m_屏幕截图视图, &ListWidget::currentRowChanged, [=](int id){setCurrentMonitor(id);});
 }
 
-void MonitorListWindow::resetSnapshots(bool)
+void MonitorListWindow::resetScreenList(void)
 {
     m_屏幕截图视图->clear();
     DesktopDuplication duplication(this);

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "canva.h"
+#include <QtDebug>
 
 class QAction;
 class QDockWidget;
@@ -16,6 +17,7 @@ public:
 signals:
 
 public slots:
+    void setCurrentMonitor(int id) {m_monitorId = id;}
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -25,6 +27,7 @@ private:
 
 private:
     Canva *m_pCanva;
+    int m_monitorId;
 };
 
 #endif // MAINWINDOW_H

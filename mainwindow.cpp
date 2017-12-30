@@ -45,8 +45,10 @@ void MainWindow::setupInterface()
     outputsDock->setVisible(monitorList->isChecked());
     addDockWidget(Qt::LeftDockWidgetArea, outputsDock);
 
-    connect(monitorList, &QAction::toggled, outputsDock, &QDockWidget::setVisible);
-
-    auto 监视器列表框架 = new MonitorListWindow();
+    auto 监视器列表框架 = new MonitorListWindow;
     outputsDock->setWidget(监视器列表框架);
+
+    connect(monitorList, &QAction::toggled, outputsDock, &QDockWidget::setVisible);
+    connect(监视器列表框架, &MonitorListWindow::currentMonitorChanged, this, &MainWindow::setCurrentMonitor);
+    setCurrentMonitor(监视器列表框架->currentMonitor());
 }
