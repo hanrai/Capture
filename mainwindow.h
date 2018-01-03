@@ -2,11 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "canva.h"
 #include <QtDebug>
 
 class QAction;
 class QDockWidget;
+class Canva;
+class MainFrame;
 
 class MainWindow : public QMainWindow
 {
@@ -24,8 +25,12 @@ protected:
 
 private:
     void setupInterface();
+    void setupMachine();
+    void saveStage();
+    void restoreStage();
 
 private:
+    MainFrame *m_machine;
     Canva *m_pCanva;
     int m_monitorId;
 };

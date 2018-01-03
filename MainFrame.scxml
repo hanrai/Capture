@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" name="MainFrame" qt:editorversion="4.4.83" xmlns:qt="http://www.qt.io/2015/02/scxml-ext">
+    <parallel id="MainState">
+        <qt:editorinfo geometry="79.87;61.44;-94.88;-167.06;1147.69;966.06" scenegeometry="79.87;61.44;-15.01;-105.62;1147.69;966.06"/>
+        <state id="UILogic">
+            <qt:editorinfo geometry="-8.19;65.53;-66.69;-134.63;1107.69;467.63" scenegeometry="55.30;134.14;-11.39;-0.49;1107.69;467.63"/>
+            <state id="NoSnapshot">
+                <qt:editorinfo geometry="13.31;46.08;-60;-50;162;100" scenegeometry="68.61;180.22;8.61;130.22;162;100"/>
+            </state>
+            <state id="Capture">
+                <qt:editorinfo geometry="304.12;-2.04;232.50;59.78;120;100" scenegeometry="375.80;124.93;608.30;184.71;120;100"/>
+                <transition type="external" target="NoSnapshot"/>
+                <onexit>
+                    <send event="TakeSnapshot"/>
+                </onexit>
+            </state>
+            <transition type="external" event="CaptureButton.Clicked" target="Capture">
+                <qt:editorinfo startTargetFactors="16.20;16.56" endTargetFactors="6.86;25.23"/>
+            </transition>
+        </state>
+    </parallel>
+</scxml>

@@ -22,9 +22,7 @@ SOURCES += main.cpp \
     desktopduplication.cpp \
     dynamic_wait.cpp \
     spotinfo.cpp \
-    canva.cpp \
     mainwindow.cpp \
-    canva.cpp \
     desktopduplication.cpp \
     dynamic_wait.cpp \
     engine.cpp \
@@ -36,7 +34,6 @@ SOURCES += main.cpp \
     spotinfo.cpp \
     MonitorList/listwidget.cpp \
     MonitorList/monitorlistwindow.cpp \
-    canva.cpp \
     desktopduplication.cpp \
     dynamic_wait.cpp \
     engine.cpp \
@@ -45,7 +42,8 @@ SOURCES += main.cpp \
     mainwindow.cpp \
     ocr.cpp \
     rect.cpp \
-    spotinfo.cpp
+    spotinfo.cpp \
+    Workspace/canva.cpp
 
 RESOURCES += qml.qrc
 
@@ -68,9 +66,7 @@ HEADERS += \
     desktopduplication.h \
     dynamic_wait.h \
     spotinfo.h \
-    canva.h \
     mainwindow.h \
-    canva.h \
     desktopduplication.h \
     dynamic_wait.h \
     engine.h \
@@ -81,7 +77,6 @@ HEADERS += \
     spotinfo.h \
     MonitorList/listwidget.h \
     MonitorList/monitorlistwindow.h \
-    canva.h \
     desktopduplication.h \
     dynamic_wait.h \
     engine.h \
@@ -89,7 +84,8 @@ HEADERS += \
     mainwindow.h \
     ocr.h \
     rect.h \
-    spotinfo.h
+    spotinfo.h \
+    Workspace/canva.h
 
 DISTFILES +=
 
@@ -120,4 +116,5 @@ else:win32-g++: PRE_TARGETDEPS += 'C:/Program Files (x86)/Windows Kits/10/Lib/10
 FORMS +=
 
 STATECHARTS += \
-    CanvaMachine.scxml
+    CanvaMachine.scxml \
+    MainFrame.scxml

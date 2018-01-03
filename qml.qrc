@@ -38,5 +38,6 @@
         <file>icons/apps/desktopshare.png</file>
         <file>ico/App-desktop-share.ico</file>
         <file>ico/Action-reload.ico</file>
+        <file>ico/App-snapshot.ico</file>
     </qresource>
 </RCC>
