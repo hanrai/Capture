@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="CanvaMachine" datamodel="ecmascript" qt:editorversion="4.4.83">
     <state id="CanvaStateMachine">
-        <qt:editorinfo scenegeometry="52.29;67.51;-123.06;-221.32;1466.51;1111.83" geometry="52.29;67.51;-175.35;-288.83;1466.51;1111.83"/>
+        <qt:editorinfo scenegeometry="53.57;66.23;-121.78;-222.60;1466.51;1111.83" geometry="53.57;66.23;-175.35;-288.83;1466.51;1111.83"/>
         <state id="Init">
             <qt:editorinfo scenegeometry="66.78;108.43;-84.22;58.43;211;100" geometry="14.49;40.92;-151;-50;211;100"/>
             <transition type="external" event="ImageLoaded" target="Main">
@@ -9,7 +9,7 @@
             </transition>
         </state>
         <parallel id="Main">
-            <qt:editorinfo scenegeometry="-51.93;-21.79;244.06;-114.61;1079.39;651.82" geometry="-104.22;-89.30;295.99;-92.82;1079.39;651.82"/>
+            <qt:editorinfo scenegeometry="-50.65;-23.07;230.67;-115.89;1094.06;651.82" geometry="-104.22;-89.30;281.32;-92.82;1094.06;651.82"/>
             <state id="Movable">
                 <qt:editorinfo scenegeometry="75.93;201.36;264.06;-35.50;1039.39;271.86" geometry="127.86;223.15;188.13;-236.86;1039.39;271.86"/>
                 <state id="Movable.Idle">
@@ -21,7 +21,7 @@
                 <state id="Movable.Set">
                     <qt:editorinfo scenegeometry="842.84;129.69;611.10;24.74;672.35;174.94" geometry="766.91;-71.67;-231.74;-104.95;672.35;174.94"/>
                     <transition type="external" event="Mouse.Released" target="Movable.Idle" cond="_event.data.button == Movable_button">
-                        <qt:editorinfo endTargetFactors="92.35;68.19" startTargetFactors="3.11;70.78"/>
+                        <qt:editorinfo endTargetFactors="93.37;64.81" startTargetFactors="1.89;69.14"/>
                     </transition>
                     <datamodel>
                         <data id="Movable_button"/>
@@ -37,7 +37,6 @@
                         <qt:editorinfo scenegeometry="829.10;129.68;769.10;79.68;195;100" geometry="-13.74;-0.01;-60;-50;195;100"/>
                         <transition type="external" event="Mouse.Moved" target="Movable.Set.Move">
                             <qt:editorinfo endTargetFactors="16.98;53.82"/>
-                            <log label="InnerMoved" expr="'InnerMoved'"/>
                         </transition>
                     </state>
                     <state id="Movable.Set.Move">
@@ -55,11 +54,29 @@
                 </state>
             </state>
             <state id="Scaleable">
-                <qt:editorinfo scenegeometry="805.03;452.59;745.03;402.59;120;100" geometry="856.96;474.38;-60;-50;120;100"/>
+                <qt:editorinfo scenegeometry="427.06;313.40;269.06;263.40;218;100" geometry="477.71;336.47;-158;-50;218;100"/>
+                <transition type="internal" event="Mouse.Wheel">
+                    <qt:editorinfo endTargetFactors="72.12;49.53"/>
+                    <if cond="_event.data.dy &gt; 0">
+                        <assign location="Scale" expr="Scale + Step"/>
+                        <else/>
+                        <assign location="Scale" expr="Scale - Step"/>
+                    </if>
+                    <send event="Scaling">
+                        <param name="scale" expr="Math.pow(2, Scale / 50)"/>
+                    </send>
+                </transition>
+                <datamodel>
+                    <data id="Scale" expr="0"/>
+                    <data id="Step"/>
+                </datamodel>
             </state>
             <state id="Resetable">
-                <qt:editorinfo scenegeometry="519.38;455.56;459.38;405.56;120;100" geometry="571.31;477.35;-60;-50;120;100"/>
+                <qt:editorinfo scenegeometry="380.20;458.11;320.20;408.11;120;100" geometry="430.85;481.18;-60;-50;120;100"/>
             </state>
+            <datamodel>
+                <data id="ResetScaleButton"/>
+            </datamodel>
         </parallel>
     </state>
 </scxml>

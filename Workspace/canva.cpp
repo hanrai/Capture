@@ -63,11 +63,6 @@ void Canva::setImage(QImage image)
     emit imageChanged(m_image);
 }
 
-//void Canva::mouseDoubleClickEvent(QMouseEvent *event)
-//{
-
-//}
-
 void Canva::mouseMoveEvent(QMouseEvent *event)
 {
     submitMouseEvent("Mouse.Moved", event);
@@ -86,15 +81,15 @@ void Canva::mouseReleaseEvent(QMouseEvent *event)
     QGraphicsView::mouseReleaseEvent(event);
 }
 
-//void Canva::wheelEvent(QWheelEvent *event)
-//{
-
-//}
-
-//void Canva::resizeEvent(QResizeEvent *event)
-//{
-
-//}
+void Canva::wheelEvent(QWheelEvent *event)
+{
+    m_machine->submitEvent("Mouse.Wheel", QVariantMap({
+            { "x", event->x() },
+            { "y", event->y() },
+            { "dx", event->angleDelta().x() },
+            { "dy", event->angleDelta().y() }
+        }));
+}
 
 void Canva::resetBackgroundPattern()
 {
@@ -127,6 +122,17 @@ void Canva::resetBackgroundPattern()
 
 void Canva::setupMachine()
 {
+    QSettings settings;
+    settings.beginGroup("Canva/Interactive");
+    auto button = settings.value("ResetScaleButton", 4).toInt();
+    auto scaleStep = settings.value("ScaleStep", 6).toDouble();
+    settings.endGroup();
+
+    m_machine->setInitialValues(QVariantMap({
+                { "ResetScaleButton", button},
+                { "Step", scaleStep}
+            }));
+
     connect(this, &Canva::imageLoadedChanged, [this](const bool loaded){
         m_machine->submitEvent(loaded ? "ImageLoaded" : "ImageUnloaded");
     });
@@ -144,6 +150,14 @@ void Canva::setupMachine()
         scrollBar->setValue(scrollBar->value() - dx);
         scrollBar = verticalScrollBar();
         scrollBar->setValue(scrollBar->value() - dy);
+    });
+
+    m_machine->connectToEvent("Scaling", this,
+        [this](const QScxmlEvent &event) {
+        auto scale = event.data().toMap().value("scale").toDouble();
+        QTransform transform;
+        transform.scale(scale, scale);
+        setTransform(transform);
     });
 }
 
