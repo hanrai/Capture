@@ -1,22 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" name="MainFrame" qt:editorversion="4.4.83" xmlns:qt="http://www.qt.io/2015/02/scxml-ext">
     <parallel id="MainState">
-        <qt:editorinfo geometry="79.87;61.44;-94.88;-167.06;1147.69;966.06" scenegeometry="79.87;61.44;-15.01;-105.62;1147.69;966.06"/>
-        <state id="UILogic">
-            <qt:editorinfo geometry="-8.19;65.53;-66.69;-134.63;1107.69;467.63" scenegeometry="55.30;134.14;-11.39;-0.49;1107.69;467.63"/>
-            <state id="NoSnapshot">
-                <qt:editorinfo geometry="13.31;46.08;-60;-50;162;100" scenegeometry="68.61;180.22;8.61;130.22;162;100"/>
+        <qt:editorinfo geometry="79.87;61.44;-295.88;-167.06;1355.50;966.06" scenegeometry="79.87;61.44;-216.01;-105.62;1355.50;966.06"/>
+        <state id="SnapshotLogic">
+            <qt:editorinfo geometry="-199.68;473.09;-65.67;-16.50;522.67;191.56" scenegeometry="-119.81;534.53;-185.48;518.03;522.67;191.56"/>
+            <state id="Idle">
+                <qt:editorinfo geometry="39.93;88.06;-60;-50;120;100" scenegeometry="103.42;606.21;43.42;556.21;120;100"/>
+                <transition type="external" event="CaptureButton.Clicked" target="Capture">
+                    <qt:editorinfo endTargetFactors="24.41;53.53"/>
+                </transition>
             </state>
             <state id="Capture">
-                <qt:editorinfo geometry="304.12;-2.04;232.50;59.78;120;100" scenegeometry="375.80;124.93;608.30;184.71;120;100"/>
-                <transition type="external" target="NoSnapshot"/>
+                <qt:editorinfo geometry="346.10;84.99;-60;-50;120;100" scenegeometry="226.29;619.52;166.29;569.52;120;100"/>
                 <onexit>
                     <send event="TakeSnapshot"/>
                 </onexit>
+                <transition type="external" target="Idle">
+                    <qt:editorinfo startTargetFactors="13.24;73.44" endTargetFactors="83.09;66.70"/>
+                    <send event="ImageChanged"/>
+                </transition>
             </state>
-            <transition type="external" event="CaptureButton.Clicked" target="Capture">
-                <qt:editorinfo startTargetFactors="16.20;16.56" endTargetFactors="6.86;25.23"/>
-            </transition>
+        </state>
+        <state id="UILogic">
+            <qt:editorinfo geometry="-8.19;65.53;-267.69;-134.63;1308.69;467.63" scenegeometry="71.68;126.97;-196.01;-7.66;1308.69;467.63"/>
+            <state id="NoSnapshot">
+                <qt:editorinfo geometry="-164.87;3.07;-60;-50;162;100" scenegeometry="-93.19;130.04;-153.19;80.04;162;100"/>
+                <transition type="external" event="ImageChanged" target="Ready">
+                    <qt:editorinfo endTargetFactors="12.78;33.90"/>
+                </transition>
+            </state>
+            <state id="Ready">
+                <qt:editorinfo geometry="190.46;-8.19;-60;-50;460;285" scenegeometry="262.14;118.78;202.14;68.78;460;285"/>
+            </state>
         </state>
     </parallel>
 </scxml>

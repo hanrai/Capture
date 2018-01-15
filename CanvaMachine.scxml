@@ -1,15 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="CanvaMachine" qt:editorversion="4.4.83">
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="CanvaMachine" datamodel="ecmascript" qt:editorversion="4.4.83">
     <state id="CanvaStateMachine">
-        <qt:editorinfo scenegeometry="49.16;65.44;-27.76;-0.05;1180.92;888.49" geometry="49.16;65.44;-76.92;-65.49;1180.92;888.49"/>
+        <qt:editorinfo scenegeometry="52.29;67.51;-123.06;-221.32;1466.51;1111.83" geometry="52.29;67.51;-175.35;-288.83;1466.51;1111.83"/>
         <state id="Init">
-            <qt:editorinfo scenegeometry="51.20;151.55;-8.80;101.55;120;100" geometry="3.08;80.89;-60;-50;120;100"/>
-            <transition type="external" event="ImageChanged" target="Ready">
-                <qt:editorinfo movePoint="7.30;8.34" endTargetFactors="28.17;52.65"/>
+            <qt:editorinfo scenegeometry="66.78;108.43;-84.22;58.43;211;100" geometry="14.49;40.92;-151;-50;211;100"/>
+            <transition type="external" event="ImageLoaded" target="Main">
+                <qt:editorinfo endTargetFactors="3.09;34.10"/>
             </transition>
         </state>
-        <state id="Ready">
-            <qt:editorinfo scenegeometry="276.47;148.48;216.47;98.48;120;100" geometry="228.35;77.82;-60;-50;120;100"/>
-        </state>
+        <parallel id="Main">
+            <qt:editorinfo scenegeometry="-51.93;-21.79;244.06;-114.61;1079.39;651.82" geometry="-104.22;-89.30;295.99;-92.82;1079.39;651.82"/>
+            <state id="Movable">
+                <qt:editorinfo scenegeometry="75.93;201.36;264.06;-35.50;1039.39;271.86" geometry="127.86;223.15;188.13;-236.86;1039.39;271.86"/>
+                <state id="Movable.Idle">
+                    <qt:editorinfo scenegeometry="344.06;128.57;284.06;78.57;180;100" geometry="268.13;-72.79;-60;-50;180;100"/>
+                    <transition type="external" event="Mouse.Pressed" target="Movable.Set">
+                        <qt:editorinfo endTargetFactors="3.50;48.58" startTargetFactors="86.22;32.05"/>
+                    </transition>
+                </state>
+                <state id="Movable.Set">
+                    <qt:editorinfo scenegeometry="842.84;129.69;611.10;24.74;672.35;174.94" geometry="766.91;-71.67;-231.74;-104.95;672.35;174.94"/>
+                    <transition type="external" event="Mouse.Released" target="Movable.Idle" cond="_event.data.button == Movable_button">
+                        <qt:editorinfo endTargetFactors="92.35;68.19" startTargetFactors="3.11;70.78"/>
+                    </transition>
+                    <datamodel>
+                        <data id="Movable_button"/>
+                        <data id="Movable_x"/>
+                        <data id="Movable_y"/>
+                    </datamodel>
+                    <onentry>
+                        <assign location="Movable_button" expr="_event.data.button"/>
+                        <assign location="Movable_x" expr="_event.data.x"/>
+                        <assign location="Movable_y" expr="_event.data.y"/>
+                    </onentry>
+                    <state id="Movable.Set.Idle">
+                        <qt:editorinfo scenegeometry="829.10;129.68;769.10;79.68;195;100" geometry="-13.74;-0.01;-60;-50;195;100"/>
+                        <transition type="external" event="Mouse.Moved" target="Movable.Set.Move">
+                            <qt:editorinfo endTargetFactors="16.98;53.82"/>
+                            <log label="InnerMoved" expr="'InnerMoved'"/>
+                        </transition>
+                    </state>
+                    <state id="Movable.Set.Move">
+                        <qt:editorinfo scenegeometry="1167.45;125.24;1107.45;75.24;156;100" geometry="324.61;-4.45;-60;-50;156;100"/>
+                    </state>
+                    <transition type="internal" event="Mouse.Moved">
+                        <qt:editorinfo endTargetFactors="49.84;28.96" startTargetFactors="4.60;30.64"/>
+                        <send event="Draging">
+                            <param name="x" expr="_event.data.x - Movable_x"/>
+                            <param name="y" expr="_event.data.y - Movable_y"/>
+                        </send>
+                        <assign location="Movable_x" expr="_event.data.x"/>
+                        <assign location="Movable_y" expr="_event.data.y"/>
+                    </transition>
+                </state>
+            </state>
+            <state id="Scaleable">
+                <qt:editorinfo scenegeometry="805.03;452.59;745.03;402.59;120;100" geometry="856.96;474.38;-60;-50;120;100"/>
+            </state>
+            <state id="Resetable">
+                <qt:editorinfo scenegeometry="519.38;455.56;459.38;405.56;120;100" geometry="571.31;477.35;-60;-50;120;100"/>
+            </state>
+        </parallel>
     </state>
 </scxml>
