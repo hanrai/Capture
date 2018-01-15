@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="CanvaMachine" datamodel="ecmascript" qt:editorversion="4.4.83">
     <state id="CanvaStateMachine">
-        <qt:editorinfo scenegeometry="53.57;66.23;-121.78;-222.60;1466.51;1111.83" geometry="53.57;66.23;-175.35;-288.83;1466.51;1111.83"/>
+        <qt:editorinfo scenegeometry="53.57;66.23;-121.78;-227.70;1466.51;711.93" geometry="53.57;66.23;-175.35;-293.93;1466.51;711.93"/>
         <state id="Init">
-            <qt:editorinfo scenegeometry="66.78;108.43;-84.22;58.43;211;100" geometry="14.49;40.92;-151;-50;211;100"/>
+            <qt:editorinfo scenegeometry="78.28;71.40;-72.72;21.40;211;100" geometry="24.71;5.17;-151;-50;211;100"/>
             <transition type="external" event="ImageLoaded" target="Main">
                 <qt:editorinfo endTargetFactors="3.09;34.10"/>
             </transition>
         </state>
         <parallel id="Main">
-            <qt:editorinfo scenegeometry="-50.65;-23.07;230.67;-115.89;1094.06;651.82" geometry="-104.22;-89.30;281.32;-92.82;1094.06;651.82"/>
+            <qt:editorinfo scenegeometry="-50.65;-23.07;230.67;-120.68;1094.06;558.60" geometry="-104.22;-89.30;281.32;-97.61;1094.06;558.60"/>
             <state id="Movable">
                 <qt:editorinfo scenegeometry="75.93;201.36;264.06;-35.50;1039.39;271.86" geometry="127.86;223.15;188.13;-236.86;1039.39;271.86"/>
                 <state id="Movable.Idle">
@@ -54,7 +54,7 @@
                 </state>
             </state>
             <state id="Scaleable">
-                <qt:editorinfo scenegeometry="427.06;313.40;269.06;263.40;218;100" geometry="477.71;336.47;-158;-50;218;100"/>
+                <qt:editorinfo scenegeometry="470.48;330.76;312.48;280.76;218;100" geometry="521.13;353.83;-158;-50;218;100"/>
                 <transition type="internal" event="Mouse.Wheel">
                     <qt:editorinfo endTargetFactors="72.12;49.53"/>
                     <if cond="_event.data.dy &gt; 0">
@@ -72,7 +72,26 @@
                 </datamodel>
             </state>
             <state id="Resetable">
-                <qt:editorinfo scenegeometry="380.20;458.11;320.20;408.11;120;100" geometry="430.85;481.18;-60;-50;120;100"/>
+                <qt:editorinfo scenegeometry="689.36;356.13;572.51;243.61;460.09;174.31" geometry="740.01;379.20;-116.85;-112.52;460.09;174.31"/>
+                <state id="Reset.Idle">
+                    <qt:editorinfo scenegeometry="643.57;381.81;583.57;331.81;149;100" geometry="-36.85;-8.21;-60;-50;149;100"/>
+                    <transition type="external" event="Mouse.Pressed" target="Reset.Set" cond="_event.data.button == ResetScaleButton">
+                        <qt:editorinfo endTargetFactors="11.76;30.34" startTargetFactors="90.91;26.35"/>
+                    </transition>
+                </state>
+                <state id="Reset.Set">
+                    <qt:editorinfo scenegeometry="941.11;377.96;881.11;327.96;120;100" geometry="260.69;-12.06;-60;-50;120;100"/>
+                    <transition type="external" event="Mouse.Released" target="Reset.Idle" cond="_event.data.button == ResetScaleButton">
+                        <qt:editorinfo endTargetFactors="92.12;63.59" startTargetFactors="11.76;67.61"/>
+                        <assign location="Scale" expr="0"/>
+                        <send event="Scaling">
+                            <param name="scale" expr="1"/>
+                        </send>
+                    </transition>
+                    <transition type="external" event="Mouse.Moved" target="Reset.Idle">
+                        <qt:editorinfo endTargetFactors="88.66;46.68"/>
+                    </transition>
+                </state>
             </state>
             <datamodel>
                 <data id="ResetScaleButton"/>
