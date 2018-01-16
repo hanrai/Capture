@@ -9,7 +9,6 @@
 Canva::Canva(QWidget *parent) :
     QGraphicsView(parent),
     m_machine(new CanvaMachine(this)),
-    m_scale(1),
     m_imageItem(nullptr),
     m_scene(new QGraphicsScene),
     m_imageLoaded(false)
@@ -63,9 +62,51 @@ void Canva::setImage(QImage image)
     emit imageChanged(m_image);
 }
 
+void Canva::setColor(QPoint position)
+{
+    if (position.x()<0)
+        return;
+    QColor color = m_image.pixelColor(position);
+
+    if (m_color == color)
+        return;
+
+    m_color = color;
+    emit colorChanged(m_color);
+}
+
+void Canva::setPosition(QPoint position)
+{
+    QPoint scenePosition;
+    if(!m_imageLoaded)
+    {
+        scenePosition = QPoint(-1, -1);
+    }
+    else
+    {
+        auto p = mapToScene(position);
+        scenePosition.setX((int)p.x());
+        scenePosition.setY((int)p.y());
+        if(scenePosition.x()<0 ||
+           scenePosition.y()<0 ||
+           scenePosition.x()>m_image.width() ||
+           scenePosition.y()>m_image.height())
+            scenePosition = QPoint(-1, -1);
+    }
+
+    if (m_position == scenePosition)
+        return;
+
+    m_position = scenePosition;
+    emit positionChanged(m_position);
+
+    setColor(m_position);
+}
+
 void Canva::mouseMoveEvent(QMouseEvent *event)
 {
     submitMouseEvent("Mouse.Moved", event);
+    setPosition(event->pos());
     QGraphicsView::mouseMoveEvent(event);
 }
 

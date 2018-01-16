@@ -11,15 +11,15 @@
         <parallel id="Main">
             <qt:editorinfo scenegeometry="-50.65;-23.07;230.67;-120.68;1094.06;558.60" geometry="-104.22;-89.30;281.32;-97.61;1094.06;558.60"/>
             <state id="Movable">
-                <qt:editorinfo scenegeometry="75.93;201.36;264.06;-35.50;1039.39;271.86" geometry="127.86;223.15;188.13;-236.86;1039.39;271.86"/>
+                <qt:editorinfo scenegeometry="77.21;200.08;265.34;-36.78;1039.39;271.86" geometry="127.86;223.15;188.13;-236.86;1039.39;271.86"/>
                 <state id="Movable.Idle">
-                    <qt:editorinfo scenegeometry="344.06;128.57;284.06;78.57;180;100" geometry="268.13;-72.79;-60;-50;180;100"/>
+                    <qt:editorinfo scenegeometry="345.34;127.29;285.34;77.29;180;100" geometry="268.13;-72.79;-60;-50;180;100"/>
                     <transition type="external" event="Mouse.Pressed" target="Movable.Set">
                         <qt:editorinfo endTargetFactors="3.50;48.58" startTargetFactors="86.22;32.05"/>
                     </transition>
                 </state>
                 <state id="Movable.Set">
-                    <qt:editorinfo scenegeometry="842.84;129.69;611.10;24.74;672.35;174.94" geometry="766.91;-71.67;-231.74;-104.95;672.35;174.94"/>
+                    <qt:editorinfo scenegeometry="844.12;128.41;612.38;23.46;672.35;174.94" geometry="766.91;-71.67;-231.74;-104.95;672.35;174.94"/>
                     <transition type="external" event="Mouse.Released" target="Movable.Idle" cond="_event.data.button == Movable_button">
                         <qt:editorinfo endTargetFactors="93.37;64.81" startTargetFactors="1.89;69.14"/>
                     </transition>
@@ -34,16 +34,15 @@
                         <assign location="Movable_y" expr="_event.data.y"/>
                     </onentry>
                     <state id="Movable.Set.Idle">
-                        <qt:editorinfo scenegeometry="829.10;129.68;769.10;79.68;195;100" geometry="-13.74;-0.01;-60;-50;195;100"/>
+                        <qt:editorinfo scenegeometry="830.38;128.40;770.38;78.40;195;100" geometry="-13.74;-0.01;-60;-50;195;100"/>
                         <transition type="external" event="Mouse.Moved" target="Movable.Set.Move">
                             <qt:editorinfo endTargetFactors="16.98;53.82"/>
                         </transition>
                     </state>
                     <state id="Movable.Set.Move">
-                        <qt:editorinfo scenegeometry="1167.45;125.24;1107.45;75.24;156;100" geometry="324.61;-4.45;-60;-50;156;100"/>
+                        <qt:editorinfo scenegeometry="1168.73;123.96;1108.73;73.96;156;100" geometry="324.61;-4.45;-60;-50;156;100"/>
                     </state>
                     <transition type="internal" event="Mouse.Moved">
-                        <qt:editorinfo endTargetFactors="49.84;28.96" startTargetFactors="4.60;30.64"/>
                         <send event="Draging">
                             <param name="x" expr="_event.data.x - Movable_x"/>
                             <param name="y" expr="_event.data.y - Movable_y"/>
@@ -56,7 +55,6 @@
             <state id="Scaleable">
                 <qt:editorinfo scenegeometry="470.48;330.76;312.48;280.76;218;100" geometry="521.13;353.83;-158;-50;218;100"/>
                 <transition type="internal" event="Mouse.Wheel">
-                    <qt:editorinfo endTargetFactors="72.12;49.53"/>
                     <if cond="_event.data.dy &gt; 0">
                         <assign location="Scale" expr="Scale + Step"/>
                         <else/>
@@ -74,13 +72,13 @@
             <state id="Resetable">
                 <qt:editorinfo scenegeometry="689.36;356.13;572.51;243.61;460.09;174.31" geometry="740.01;379.20;-116.85;-112.52;460.09;174.31"/>
                 <state id="Reset.Idle">
-                    <qt:editorinfo scenegeometry="643.57;381.81;583.57;331.81;149;100" geometry="-36.85;-8.21;-60;-50;149;100"/>
+                    <qt:editorinfo scenegeometry="652.51;347.92;592.51;297.92;149;100" geometry="-36.85;-8.21;-60;-50;149;100"/>
                     <transition type="external" event="Mouse.Pressed" target="Reset.Set" cond="_event.data.button == ResetScaleButton">
                         <qt:editorinfo endTargetFactors="11.76;30.34" startTargetFactors="90.91;26.35"/>
                     </transition>
                 </state>
                 <state id="Reset.Set">
-                    <qt:editorinfo scenegeometry="941.11;377.96;881.11;327.96;120;100" geometry="260.69;-12.06;-60;-50;120;100"/>
+                    <qt:editorinfo scenegeometry="950.05;344.07;890.05;294.07;120;100" geometry="260.69;-12.06;-60;-50;120;100"/>
                     <transition type="external" event="Mouse.Released" target="Reset.Idle" cond="_event.data.button == ResetScaleButton">
                         <qt:editorinfo endTargetFactors="92.12;63.59" startTargetFactors="11.76;67.61"/>
                         <assign location="Scale" expr="0"/>
@@ -96,6 +94,13 @@
             <datamodel>
                 <data id="ResetScaleButton"/>
             </datamodel>
+            <state id="Recapture">
+                <qt:editorinfo geometry="1261.62;354.73;-158;-50;218;100" scenegeometry="1210.97;331.66;1052.97;281.66;218;100"/>
+                <transition type="internal" event="ImageChanged">
+                    <qt:editorinfo endTargetFactors="18.80;44.83"/>
+                    <assign location="Scale" expr="0"/>
+                </transition>
+            </state>
         </parallel>
     </state>
 </scxml>

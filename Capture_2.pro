@@ -43,7 +43,20 @@ SOURCES += main.cpp \
     ocr.cpp \
     rect.cpp \
     spotinfo.cpp \
-    Workspace/canva.cpp
+    Workspace/canva.cpp \
+    MonitorList/listwidget.cpp \
+    MonitorList/monitorlistwindow.cpp \
+    Workspace/canva.cpp \
+    desktopduplication.cpp \
+    dynamic_wait.cpp \
+    engine.cpp \
+    hotspot.cpp \
+    main.cpp \
+    mainwindow.cpp \
+    ocr.cpp \
+    rect.cpp \
+    spotinfo.cpp \
+    Workspace/canvastatus.cpp
 
 RESOURCES += qml.qrc
 
@@ -85,7 +98,19 @@ HEADERS += \
     ocr.h \
     rect.h \
     spotinfo.h \
-    Workspace/canva.h
+    Workspace/canva.h \
+    MonitorList/listwidget.h \
+    MonitorList/monitorlistwindow.h \
+    Workspace/canva.h \
+    desktopduplication.h \
+    dynamic_wait.h \
+    engine.h \
+    hotspot.h \
+    mainwindow.h \
+    ocr.h \
+    rect.h \
+    spotinfo.h \
+    Workspace/canvastatus.h
 
 DISTFILES +=
 

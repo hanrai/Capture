@@ -8,6 +8,7 @@ class QAction;
 class QDockWidget;
 class Canva;
 class MainFrame;
+class CanvaStatus;
 
 class MainWindow : public QMainWindow
 {
@@ -31,7 +32,8 @@ private:
 
 private:
     MainFrame *m_machine;
-    Canva *m_pCanva;
+    Canva *m_canva;
+    CanvaStatus *m_canvaStatus;
     int m_monitorId;
 };
 

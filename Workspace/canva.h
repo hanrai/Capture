@@ -3,6 +3,8 @@
 
 #include <QGraphicsView>
 #include <QImage>
+#include <QPoint>
+#include <QColor>
 #include <QtDebug>
 
 class CanvaMachine;
@@ -13,6 +15,8 @@ class Canva : public QGraphicsView
     Q_OBJECT
     Q_PROPERTY(QImage image READ image WRITE setImage NOTIFY imageChanged)
     Q_PROPERTY(bool imageLoaded READ imageLoaded NOTIFY imageLoadedChanged)
+    Q_PROPERTY(QPoint position READ position NOTIFY positionChanged)
+    Q_PROPERTY(QColor color READ color NOTIFY colorChanged)
 public:
     explicit Canva(QWidget *parent = nullptr);
     ~Canva();
@@ -27,9 +31,21 @@ public:
         return m_imageLoaded;
     }
 
+    QPoint position() const
+    {
+        return m_position;
+    }
+
+    QColor color() const
+    {
+        return m_color;
+    }
+
 signals:
     void imageChanged(QImage image);
     void imageLoadedChanged(bool imageLoaded);
+    void positionChanged(QPoint position);
+    void colorChanged(QColor color);
 
 public slots:
     void setImage(QImage image);
@@ -42,6 +58,9 @@ private slots:
         m_imageLoaded = imageLoaded;
         emit imageLoadedChanged(m_imageLoaded);
     }
+
+    void setPosition(QPoint position);
+    void setColor(QPoint position);
 
 protected:
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -57,10 +76,11 @@ private:
 private:
     CanvaMachine *m_machine;
     QImage m_image;
-    qreal m_scale;
     QGraphicsPixmapItem *m_imageItem;
     QGraphicsScene *m_scene;
     bool m_imageLoaded;
+    QPoint m_position;
+    QColor m_color;
 };
 
 #endif // CANVA_H

@@ -6,17 +6,20 @@
 #include <QMenu>
 #include <QDockWidget>
 #include <QtDebug>
+#include <QStatusBar>
 #include "MonitorList/monitorlistwindow.h"
 #include "Workspace/canva.h"
+#include "Workspace/canvastatus.h"
 #include "MainFrame.h"
 #include "desktopduplication.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_machine(new MainFrame(this)),
-    m_pCanva(new Canva(this))
+    m_canva(new Canva(this)),
+    m_canvaStatus(new CanvaStatus(m_canva))
 {
-    setCentralWidget(m_pCanva);
+    setCentralWidget(m_canva);
     setIconSize(QSize(64, 64));
 
     restoreStage();
@@ -65,6 +68,9 @@ void MainWindow::setupInterface()
     connect(monitorList, &QAction::toggled, outputsDock, &QDockWidget::setVisible);
     connect(监视器列表框架, &MonitorListWindow::currentMonitorChanged, this, &MainWindow::setCurrentMonitor);
     setCurrentMonitor(监视器列表框架->currentMonitor());
+
+    auto stat = statusBar();
+    stat->addWidget(m_canvaStatus);
 }
 
 void MainWindow::setupMachine()
@@ -73,7 +79,7 @@ void MainWindow::setupMachine()
 
     m_machine->connectToEvent("TakeSnapshot", this, [this](const QScxmlEvent &){
         DesktopDuplication duplication;
-        m_pCanva->setImage(duplication.takeSnapshot(m_monitorId));
+        m_canva->setImage(duplication.takeSnapshot(m_monitorId));
     });
 }
 

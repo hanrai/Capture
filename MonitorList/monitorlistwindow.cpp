@@ -21,7 +21,7 @@ void MonitorListWindow::初始化界面()
     监视器列表工具栏->setObjectName("Monitor list toolbar");
     const QIcon 刷新图标 = QIcon(":/img/ico/Action-reload.ico");
     auto 刷新 = new QAction(刷新图标, tr("Rescan"), this);
-    刷新->setStatusTip(tr("Show/Hide monitor list."));
+    刷新->setStatusTip(tr("Refresh monitor list."));
     QObject::connect(刷新, &QAction::triggered, this, &MonitorListWindow::resetScreenList);
 
     监视器列表工具栏->addAction(刷新);
